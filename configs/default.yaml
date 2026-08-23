@@ -1,0 +1,60 @@
+# Default configuration for the CivicTwin synthetic prototype.
+
+seed: 42
+n_neighborhoods: 16
+n_steps: 12
+feature_names:
+  - land_value
+  - rent
+  - population
+  - median_income
+  - housing_units
+  - accessibility
+
+city:
+  lattice_rows: 4
+  lattice_cols: 4
+  neighbor_decay: 0.35
+  random_graph_p: 0.08
+
+synth:
+  accessibility_shock_strength: 2.0
+  accessibility_shock_nodes: [0, 1, 4, 7]
+  accessibility_shock_step: 3
+  land_value_to_rent: 0.45
+  rent_lag: 1
+  rent_spill_decay: 0.25
+  income_pressure: 0.1
+  low_income_share_shift: 0.04
+  population_growth: 0.08
+  housing_growth: 0.03
+  base_land_value: 100.0
+  base_rent: 50.0
+  base_population: 2000.0
+  base_income: 60000.0
+  base_housing_units: 900.0
+  base_accessibility: 1.0
+
+policy:
+  market_led:
+    intensity: 0.8
+  inclusionary_housing:
+    intensity: 0.6
+  land_value_capture:
+    intensity: 0.7
+
+scoring:
+  weights:
+    rent_growth: 0.4
+    income_change: 0.3
+    housing_change: 0.3
+
+model:
+  hidden_dim: 8
+  num_layers: 1
+  dropout: 0.0
+
+training:
+  learning_rate: 1e-3
+  epochs: 5
+  batch_size: 4

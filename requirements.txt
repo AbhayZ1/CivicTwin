@@ -1,0 +1,7 @@
+numpy>=1.26
+pandas>=2.0
+PyYAML>=6.0
+networkx>=3.0
+pytest>=8.0
+torch>=2.2
+torch-geometric>=2.5
