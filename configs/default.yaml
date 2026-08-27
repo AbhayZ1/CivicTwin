@@ -49,6 +49,16 @@ scoring:
     income_change: 0.3
     housing_change: 0.3
 
+  # H+T Overburden Index parameters.
+  # rent_to_monthly_cost converts the synthetic rent index into a monthly
+  # currency amount; threshold is the CNT H+T affordability benchmark.
+  overburden:
+    months_per_year: 12.0
+    rent_to_monthly_cost: 30.0
+    transport_base_cost: 6000.0
+    transport_accessibility_elasticity: 1.0
+    threshold: 0.45
+
 model:
   hidden_dim: 8
   num_layers: 1
@@ -58,3 +68,8 @@ training:
   learning_rate: 1e-3
   epochs: 5
   batch_size: 4
+  scale_features: true
+
+benchmark:
+  seeds: [1, 2, 3, 4, 5]
+  window_size: 4
