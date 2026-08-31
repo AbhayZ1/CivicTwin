@@ -1,0 +1,27 @@
+\begin{algorithm}[t]
+\caption{Causal ST-GNN forward pass with direct/spillover decomposition (CG-CEN)}
+\label{alg:causal_stgnn}
+\begin{algorithmic}[1]
+\REQUIRE Node history $X_{i,t-W+1:t} \in \mathbb{R}^{W \times F}$ for all $i \in \mathcal{V}$;
+         policy assignment $P_{i,t} \in \{0,1\}$; adjacency $\mathcal{N}(\cdot)$ with
+         row-normalised weights $W_{ij}$
+\ENSURE  Prediction $\hat{Y}_{i,t+1}$, individual treatment effect $\tau_i$,
+         spatial interference effect $\eta_i$
+\STATE $\mu, \sigma \gets$ \textsc{FitScaler}$(X_{\text{train}})$ \COMMENT{training split only}
+\STATE $Z_{i,\cdot} \gets (X_{i,\cdot} - \mu) / \sigma$ for all $i$
+\FOR{$k = t-W+1$ \TO $t$}
+    \STATE $e_{i,k} \gets \mathrm{ReLU}(\mathbf{W}_{\text{enc}} Z_{i,k} + b_{\text{enc}})$
+\ENDFOR
+\STATE $h_i \gets \mathrm{GRU}\big(e_{i,t-W+1}, \dots, e_{i,t}\big)$ \COMMENT{node-local; no message passing}
+\STATE $s_i \gets [\,h_i \,\Vert\, P_{i,t}\,]$
+\STATE $\Phi_i \gets \mathrm{MLP}_{\Phi}(s_i) + X_{i,t}$ \COMMENT{direct term, residual anchor}
+\STATE $\Psi_j \gets \mathrm{MLP}_{\Psi}(s_j)$ for all $j$
+\STATE $\Omega_i \gets \sum_{j \in \mathcal{N}(i)} W_{ij} \, \Psi_j$ \COMMENT{spatial interference}
+\STATE $\hat{Y}_{i,t+1} \gets \Phi_i + \Omega_i$
+\STATE $s_i^{0} \gets [\,h_i \,\Vert\, 0\,]$ \COMMENT{counterfactual: no intervention}
+\STATE $\tau_i \gets \mathrm{MLP}_{\Phi}(s_i) - \mathrm{MLP}_{\Phi}(s_i^{0})$ \COMMENT{ITE}
+\STATE $\eta_i \gets \sum_{j \in \mathcal{N}(i)} W_{ij}\big(\mathrm{MLP}_{\Psi}(s_j)
+        - \mathrm{MLP}_{\Psi}(s_j^{0})\big)$ \COMMENT{STE}
+\RETURN $\hat{Y}_{i,t+1}, \tau_i, \eta_i$
+\end{algorithmic}
+\end{algorithm}

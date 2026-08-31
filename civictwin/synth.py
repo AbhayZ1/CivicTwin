@@ -14,7 +14,7 @@ import numpy as np
 
 try:
     import yaml
-except ImportError:  # pragma: no cover - optional dependency in minimal envs.
+except ImportError:
     yaml = None
 
 
@@ -43,6 +43,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "land_value_to_rent": 0.45,
         "rent_lag": 1,
         "rent_spill_decay": 0.25,
+        "neighbor_shock_transmission": 0.10,
         "income_pressure": 0.1,
         "low_income_share_shift": 0.04,
         "population_growth": 0.08,
@@ -170,6 +171,7 @@ def generate_synthetic_city(
     shock_step = int(synth_cfg.get("accessibility_shock_step", 3))
     shock_strength = float(synth_cfg.get("accessibility_shock_strength", 2.0))
     neighbor_decay = float(cfg.get("city", {}).get("neighbor_decay", 0.35))
+    shock_transmission = float(synth_cfg.get("neighbor_shock_transmission", 0.10))
 
     base_land_value = float(synth_cfg.get("base_land_value", 100.0))
     base_rent = float(synth_cfg.get("base_rent", 50.0))
@@ -192,6 +194,11 @@ def generate_synthetic_city(
         degrees = adjacency.sum(axis=1)
         neighbor_land_term = local_neighbor_land / np.maximum(degrees, 1)
         neighbor_rent_term = local_neighbor_rent / np.maximum(degrees, 1)
+
+
+        neighbor_shock_term = (
+            adjacency @ (panel[:, step - 1, 5] - base_accessibility)
+        ) / np.maximum(degrees, 1)
 
         for node in range(n_neighborhoods):
             shock_indicator = 1.0 if node in shock_nodes and step >= shock_step else 0.0
@@ -216,6 +223,7 @@ def generate_synthetic_city(
                 0.01
                 + 0.12 * (panel[node, step, 0] - prev_land) / max(prev_land, 1.0)
                 + 0.25 * neighbor_decay * neighbor_rent_term[node] / max(prev_rent, 1.0)
+                + shock_transmission * neighbor_shock_term[node]
             )
             panel[node, step, 1] = max(1.0, prev_rent * (1.0 + rent_growth))
 
@@ -248,4 +256,119 @@ def generate_synthetic_city(
     }
 
 
-__all__ = ["generate_synthetic_city", "_load_config"]
+def scenario_panels(
+    seed: int = 42,
+    n_neighborhoods: int = 16,
+    n_steps: int = 18,
+    config: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    from civictwin.policy import (
+        apply_policy,
+        baseline_policy,
+        inclusionary_housing_policy,
+        land_value_capture_policy,
+        market_led_policy,
+    )
+
+    city = generate_synthetic_city(
+        seed=seed, n_neighborhoods=n_neighborhoods, n_steps=n_steps, config=config
+    )
+    cfg = city["config"]
+    synth_cfg = cfg.get("synth", {}) or {}
+    policy_cfg = cfg.get("policy", {}) or {}
+    shock_nodes = synth_cfg.get("accessibility_shock_nodes", [0, 1, 4, 7])
+    boundary = sorted({int(n) for n in shock_nodes if 0 <= int(n) < n_neighborhoods}) or [0]
+
+    def intensity(name: str, fallback: float) -> float:
+        return float((policy_cfg.get(name, {}) or {}).get("intensity", fallback))
+
+    policies = [
+        baseline_policy(),
+        market_led_policy(boundary, timing=2, intensity=intensity("market_led", 0.8)),
+        inclusionary_housing_policy(
+            boundary, timing=1, intensity=intensity("inclusionary_housing", 0.6)
+        ),
+        land_value_capture_policy(
+            boundary, timing=2, intensity=intensity("land_value_capture", 0.7)
+        ),
+    ]
+
+    panels = {p.name: apply_policy(city["panel"], p) for p in policies}
+    city["scenarios"] = panels
+    city["boundary"] = boundary
+    return city
+
+
+def export_scenario_datasets(
+    seeds: Iterable[int] = tuple(range(1, 11)),
+    n_neighborhoods: int = 16,
+    n_steps: int = 18,
+    output_dir: str | Path = "./data/synthetic",
+    config: Optional[Dict[str, Any]] = None,
+) -> Path:
+    destination = Path(output_dir)
+    destination.mkdir(parents=True, exist_ok=True)
+
+    manifest = []
+    for seed in seeds:
+        city = scenario_panels(
+            seed=int(seed),
+            n_neighborhoods=n_neighborhoods,
+            n_steps=n_steps,
+            config=config,
+        )
+        for scenario, panel in city["scenarios"].items():
+            filename = f"seed{int(seed):03d}_{scenario}.npz"
+            np.savez_compressed(
+                destination / filename,
+                panel=panel,
+                adjacency=city["adjacency"],
+                edge_index=city["edge_index"],
+                low_income_share=city["low_income_share"],
+                feature_names=np.array(city["feature_names"], dtype=object),
+                boundary=np.array(city["boundary"], dtype=np.int64),
+                seed=np.array([int(seed)]),
+            )
+            manifest.append(
+                {
+                    "seed": int(seed),
+                    "scenario": scenario,
+                    "file": filename,
+                    "n_neighborhoods": int(panel.shape[0]),
+                    "n_steps": int(panel.shape[1]),
+                    "n_features": int(panel.shape[2]),
+                    "n_edges": int(city["edge_index"].shape[1]),
+                    "treated_nodes": int(len(city["boundary"])),
+                }
+            )
+
+    import csv
+
+    manifest_path = destination / "manifest.csv"
+    with manifest_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(manifest[0].keys()))
+        writer.writeheader()
+        writer.writerows(manifest)
+    return manifest_path
+
+
+def load_scenario_dataset(path: str | Path) -> Dict[str, Any]:
+    data = np.load(Path(path), allow_pickle=True)
+    return {
+        "panel": data["panel"],
+        "adjacency": data["adjacency"],
+        "edge_index": data["edge_index"],
+        "low_income_share": data["low_income_share"],
+        "feature_names": list(data["feature_names"]),
+        "boundary": list(data["boundary"]),
+        "seed": int(data["seed"][0]),
+    }
+
+
+__all__ = [
+    "generate_synthetic_city",
+    "scenario_panels",
+    "export_scenario_datasets",
+    "load_scenario_dataset",
+    "_load_config",
+]

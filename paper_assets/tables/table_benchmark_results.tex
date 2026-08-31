@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\caption{Forecast accuracy across policy scenarios on the synthetic CivicTwin panel. Values are mean $\pm$ standard deviation of the pooled test-set error over independent seeds. Significance markers denote a paired $t$-test of each baseline against the Causal ST-GNN on MAE ($^{*}p<0.05$, $^{**}p<0.01$, $^{***}p<0.001$).}
+\label{tab:benchmark_results}
+\small
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Model} & \multicolumn{2}{c}{\textbf{Baseline}} & \multicolumn{2}{c}{\textbf{Market-Led Development}} & \multicolumn{2}{c}{\textbf{Inclusionary Housing}} & \multicolumn{2}{c}{\textbf{Land-Value Capture}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+ & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
+\midrule
+Causal ST-GNN (CG-CEN) & $14.735 \pm 1.458$ & $38.617 \pm 2.596$ & $15.163 \pm 1.209$ & $40.326 \pm 1.945$ & $14.647 \pm 0.830$ & $38.412 \pm 2.046$ & $14.718 \pm 0.958$ & $38.497 \pm 1.878$ \\
+Spatial Lag Model & $6.922 \pm 2.511^{***}$ & $11.914 \pm 4.463$ & $7.104 \pm 2.571^{***}$ & $12.148 \pm 4.526$ & $6.820 \pm 2.487^{***}$ & $11.771 \pm 4.426$ & $6.834 \pm 2.498^{***}$ & $11.785 \pm 4.421$ \\
+Temporal MLP & $16.814 \pm 4.239$ & $29.970 \pm 9.640$ & $17.080 \pm 3.944$ & $30.655 \pm 9.500$ & $16.530 \pm 2.907$ & $29.509 \pm 6.800$ & $16.556 \pm 3.147$ & $29.749 \pm 7.436$ \\
+Naive Persistence & $59.897 \pm 0.644^{***}$ & $99.221 \pm 1.579$ & $61.130 \pm 0.665^{***}$ & $102.359 \pm 1.645$ & $59.430 \pm 0.636^{***}$ & $98.028 \pm 1.555$ & $59.711 \pm 0.642^{***}$ & $98.734 \pm 1.572$ \\
+\midrule
+\textit{p} vs. ST-GNN (MAE) & \multicolumn{2}{c}{$<0.001$} & \multicolumn{2}{c}{$<0.001$} & \multicolumn{2}{c}{$<0.001$} & \multicolumn{2}{c}{$<0.001$} \\
+\bottomrule
+\end{tabular}
+\end{table*}

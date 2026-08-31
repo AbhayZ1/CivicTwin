@@ -24,6 +24,7 @@ synth:
   land_value_to_rent: 0.45
   rent_lag: 1
   rent_spill_decay: 0.25
+  neighbor_shock_transmission: 0.10
   income_pressure: 0.1
   low_income_share_shift: 0.04
   population_growth: 0.08
@@ -45,19 +46,15 @@ policy:
 
 scoring:
   weights:
-    rent_growth: 0.4
-    income_change: 0.3
-    housing_change: 0.3
+    alpha: 0.4
+    beta: 0.3
+    gamma: 0.3
 
-  # H+T Overburden Index parameters.
-  # rent_to_monthly_cost converts the synthetic rent index into a monthly
-  # currency amount; threshold is the CNT H+T affordability benchmark.
   overburden:
-    months_per_year: 12.0
-    rent_to_monthly_cost: 30.0
-    transport_base_cost: 6000.0
-    transport_accessibility_elasticity: 1.0
-    threshold: 0.45
+    transit_base_cost: 20.0
+    transit_accessibility_elasticity: 1.0
+    annualization: 1.0
+    affordability_threshold: 0.45
 
 model:
   hidden_dim: 8

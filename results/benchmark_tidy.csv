@@ -1,0 +1,241 @@
+seed,scenario,topology,model,model_label,overall_mae,overall_rmse
+1,baseline,real,stgnn,Causal ST-GNN,14.922080898979724,38.01413239311516
+1,baseline,real,mlp,Temporal MLP,13.430254124982579,20.887219454556835
+1,baseline,real,slm,Spatial Lag Model,6.929891285656961,11.210030608538213
+1,baseline,real,persistence,Naive Persistence,59.72828132017175,98.63640631064635
+2,baseline,real,stgnn,Causal ST-GNN,13.610351140081525,37.93679843840563
+2,baseline,real,mlp,Temporal MLP,15.487726014388231,23.984570421629538
+2,baseline,real,slm,Spatial Lag Model,9.67106976847424,17.1028416026552
+2,baseline,real,persistence,Naive Persistence,59.916020620143726,99.34572692779125
+3,baseline,real,stgnn,Causal ST-GNN,15.153650511640581,41.18411295019462
+3,baseline,real,mlp,Temporal MLP,27.964819792686352,54.30093725531727
+3,baseline,real,slm,Spatial Lag Model,2.797243487076939,4.626388323411715
+3,baseline,real,persistence,Naive Persistence,59.34657225531266,98.15263557158839
+4,baseline,real,stgnn,Causal ST-GNN,13.241847731032733,38.99452626318019
+4,baseline,real,mlp,Temporal MLP,18.032144214312584,32.968012179163736
+4,baseline,real,slm,Spatial Lag Model,5.573722383229674,10.847221743626736
+4,baseline,real,persistence,Naive Persistence,60.37558904117941,100.25837210839406
+5,baseline,real,stgnn,Causal ST-GNN,14.694465127733167,34.4345709357045
+5,baseline,real,mlp,Temporal MLP,18.00647215861653,31.314355205241487
+5,baseline,real,slm,Spatial Lag Model,8.589382195377471,15.371477829285157
+5,baseline,real,persistence,Naive Persistence,58.9365108124007,97.17490236026237
+6,baseline,real,stgnn,Causal ST-GNN,14.77875182045662,41.18056060467988
+6,baseline,real,mlp,Temporal MLP,14.965568918084838,27.400648961016625
+6,baseline,real,slm,Spatial Lag Model,9.448938399666106,16.601125879108732
+6,baseline,real,persistence,Naive Persistence,60.69340579079579,101.61886644855298
+7,baseline,real,stgnn,Causal ST-GNN,13.095490476383084,37.07950770996293
+7,baseline,real,mlp,Temporal MLP,16.7636036197337,31.79727050666242
+7,baseline,real,slm,Spatial Lag Model,5.149022792759314,8.61102434266943
+7,baseline,real,persistence,Naive Persistence,60.37780080279356,100.38429784569828
+8,baseline,real,stgnn,Causal ST-GNN,14.29553406043212,35.3974938239656
+8,baseline,real,mlp,Temporal MLP,14.867376982968665,22.717031916380613
+8,baseline,real,slm,Spatial Lag Model,8.662976350411496,14.628117821385688
+8,baseline,real,persistence,Naive Persistence,58.93314982933965,96.59045076679188
+9,baseline,real,stgnn,Causal ST-GNN,15.32814060097125,39.36494756813767
+9,baseline,real,mlp,Temporal MLP,15.192078655241486,31.45812164413529
+9,baseline,real,slm,Spatial Lag Model,3.554808932223144,5.678840397892176
+9,baseline,real,persistence,Naive Persistence,60.52726650780512,100.44732962163467
+10,baseline,real,stgnn,Causal ST-GNN,18.22567235973381,42.58161209412965
+10,baseline,real,mlp,Temporal MLP,13.428160919842586,22.8690876925046
+10,baseline,real,slm,Spatial Lag Model,8.838306969929288,14.462695327562914
+10,baseline,real,persistence,Naive Persistence,60.13149274975743,99.60235274573823
+1,market_led,real,stgnn,Causal ST-GNN,15.945608413155755,40.54553759280994
+1,market_led,real,mlp,Temporal MLP,15.098833432066007,23.8800682876952
+1,market_led,real,slm,Spatial Lag Model,7.0514181892155,11.344667159716732
+1,market_led,real,persistence,Naive Persistence,60.953403306421265,101.76576421590788
+2,market_led,real,stgnn,Causal ST-GNN,15.987768933035879,42.574328069466155
+2,market_led,real,mlp,Temporal MLP,16.068001793627637,24.959655393449058
+2,market_led,real,slm,Spatial Lag Model,9.891954182891917,17.163742856478322
+2,market_led,real,persistence,Naive Persistence,61.153043328170085,102.50274861176001
+3,market_led,real,stgnn,Causal ST-GNN,15.48352839900493,41.03467097885441
+3,market_led,real,mlp,Temporal MLP,27.405899479806735,55.06414133800186
+3,market_led,real,slm,Spatial Lag Model,2.7860564901162146,4.58001235001681
+3,market_led,real,persistence,Naive Persistence,60.56242711550111,101.21595850702658
+4,market_led,real,stgnn,Causal ST-GNN,13.450102323542465,39.07032184087257
+4,market_led,real,mlp,Temporal MLP,17.03755822603974,30.66321074962052
+4,market_led,real,slm,Spatial Lag Model,5.847804821927334,11.180502994907853
+4,market_led,real,persistence,Naive Persistence,61.62023508167667,103.42056651884687
+5,market_led,real,stgnn,Causal ST-GNN,15.523327626826205,36.426070957774044
+5,market_led,real,mlp,Temporal MLP,18.847947872586534,32.94660878236629
+5,market_led,real,slm,Spatial Lag Model,8.838872849384964,15.847380011016178
+5,market_led,real,persistence,Naive Persistence,60.1429117222255,100.23620702267172
+6,market_led,real,stgnn,Causal ST-GNN,13.290706626201047,42.78347015406545
+6,market_led,real,mlp,Temporal MLP,15.32335665289318,27.77048180542342
+6,market_led,real,slm,Spatial Lag Model,9.675132866717801,16.892848791754858
+6,market_led,real,persistence,Naive Persistence,61.96075468510248,104.87608960203795
+7,market_led,real,stgnn,Causal ST-GNN,14.91073395031183,40.46813439207138
+7,market_led,real,mlp,Temporal MLP,17.19905767242027,32.27859072279855
+7,market_led,real,slm,Spatial Lag Model,5.323560124364297,8.889444983670023
+7,market_led,real,persistence,Naive Persistence,61.628455501295356,103.58596718371422
+8,market_led,real,stgnn,Causal ST-GNN,16.187511227403814,38.215646590982175
+8,market_led,real,mlp,Temporal MLP,14.92835752333428,23.262310454314168
+8,market_led,real,slm,Spatial Lag Model,8.764734664797022,14.7753304009672
+8,market_led,real,persistence,Naive Persistence,60.13048151477095,99.62799161109368
+9,market_led,real,stgnn,Causal ST-GNN,14.021299134598642,40.94948500721662
+9,market_led,real,mlp,Temporal MLP,15.809294359152853,32.94688982002287
+9,market_led,real,slm,Spatial Lag Model,3.6882811584725155,5.90154903330829
+9,market_led,real,persistence,Naive Persistence,61.77775894832144,103.63020741690767
+10,market_led,real,stgnn,Causal ST-GNN,16.82613767441411,41.191355349691975
+10,market_led,real,mlp,Temporal MLP,13.082576849810462,22.776282933028515
+10,market_led,real,slm,Spatial Lag Model,9.170409753507386,14.899564494922547
+10,market_led,real,persistence,Naive Persistence,61.367465246773335,102.72960277257637
+1,inclusionary_housing,real,stgnn,Causal ST-GNN,15.477322016442525,38.655064124386186
+1,inclusionary_housing,real,mlp,Temporal MLP,13.379015892087624,21.748341245959526
+1,inclusionary_housing,real,slm,Spatial Lag Model,6.851109026276231,11.131781618973305
+1,inclusionary_housing,real,persistence,Naive Persistence,59.25942853348765,97.41366453196744
+2,inclusionary_housing,real,stgnn,Causal ST-GNN,14.767023447014271,40.024362700331395
+2,inclusionary_housing,real,mlp,Temporal MLP,15.334632065005156,23.89030489589843
+2,inclusionary_housing,real,slm,Spatial Lag Model,9.47121970520739,17.038673623657164
+2,inclusionary_housing,real,persistence,Naive Persistence,59.443731961833905,98.12284936664453
+3,inclusionary_housing,real,stgnn,Causal ST-GNN,14.687845786180013,39.920452452650515
+3,inclusionary_housing,real,mlp,Temporal MLP,22.024749483655572,42.475890691548734
+3,inclusionary_housing,real,slm,Spatial Lag Model,2.7836868555630248,4.614771604988839
+3,inclusionary_housing,real,persistence,Naive Persistence,58.89822573856895,97.06028673317853
+4,inclusionary_housing,real,stgnn,Causal ST-GNN,14.782114426927865,38.981318126419204
+4,inclusionary_housing,real,mlp,Temporal MLP,18.09346983959198,33.04429364223773
+4,inclusionary_housing,real,slm,Spatial Lag Model,5.398192956807583,10.594386567608712
+4,inclusionary_housing,real,persistence,Naive Persistence,59.911607667803125,99.09045536247802
+5,inclusionary_housing,real,stgnn,Causal ST-GNN,14.484768201756435,34.044840208647464
+5,inclusionary_housing,real,mlp,Temporal MLP,20.399576249910407,36.33579520827928
+5,inclusionary_housing,real,slm,Spatial Lag Model,8.57056013854135,15.217569526970266
+5,inclusionary_housing,real,persistence,Naive Persistence,58.477301878604024,96.00228905982135
+6,inclusionary_housing,real,stgnn,Causal ST-GNN,13.596349170039492,41.08947180186474
+6,inclusionary_housing,real,mlp,Temporal MLP,15.071301936829657,28.165978938642176
+6,inclusionary_housing,real,slm,Spatial Lag Model,9.30858293657263,16.372481337890296
+6,inclusionary_housing,real,persistence,Naive Persistence,60.20999229796765,100.35630381239228
+7,inclusionary_housing,real,stgnn,Causal ST-GNN,14.193823432917974,38.3575179950851
+7,inclusionary_housing,real,mlp,Temporal MLP,16.971352523037567,32.100752249828076
+7,inclusionary_housing,real,slm,Spatial Lag Model,4.996712337461889,8.401511712598403
+7,inclusionary_housing,real,persistence,Naive Persistence,59.90028852236017,99.14314555138526
+8,inclusionary_housing,real,stgnn,Causal ST-GNN,14.812012429366657,36.01182352761364
+8,inclusionary_housing,real,mlp,Temporal MLP,16.060108100075006,24.29619813244487
+8,inclusionary_housing,real,slm,Spatial Lag Model,8.632993434374715,14.510694923871661
+8,inclusionary_housing,real,persistence,Naive Persistence,58.473095600587655,95.3976864252735
+9,inclusionary_housing,real,stgnn,Causal ST-GNN,13.411518603527838,38.08841830122622
+9,inclusionary_housing,real,mlp,Temporal MLP,14.866376440931965,31.181816808098844
+9,inclusionary_housing,real,slm,Spatial Lag Model,3.504414647991992,5.6295498406449305
+9,inclusionary_housing,real,persistence,Naive Persistence,60.05311805366852,99.22919963819747
+10,inclusionary_housing,real,stgnn,Causal ST-GNN,16.2546521490501,38.95122137173765
+10,inclusionary_housing,real,mlp,Temporal MLP,13.09725406602227,21.848650615331458
+10,inclusionary_housing,real,slm,Spatial Lag Model,8.682666136457025,14.202005492284748
+10,inclusionary_housing,real,persistence,Naive Persistence,59.674909832432455,98.46473043309011
+1,land_value_capture,real,stgnn,Causal ST-GNN,15.640180592717636,38.888970432023825
+1,land_value_capture,real,mlp,Temporal MLP,13.681554635190132,22.02127470773974
+1,land_value_capture,real,slm,Spatial Lag Model,6.847966174585001,11.11746764287635
+1,land_value_capture,real,persistence,Naive Persistence,59.53494564855511,98.09880834738445
+2,land_value_capture,real,stgnn,Causal ST-GNN,13.668838213283447,38.55357830472162
+2,land_value_capture,real,mlp,Temporal MLP,15.55210416124871,24.234576592580463
+2,land_value_capture,real,slm,Spatial Lag Model,9.448960729398099,17.01515221049057
+2,land_value_capture,real,persistence,Naive Persistence,59.722546082941776,98.8201282785377
+3,land_value_capture,real,stgnn,Causal ST-GNN,14.945050883728292,39.10606734073153
+3,land_value_capture,real,mlp,Temporal MLP,22.25210331261895,43.59843981585878
+3,land_value_capture,real,slm,Spatial Lag Model,2.8090725863080253,4.6441342119983915
+3,land_value_capture,real,persistence,Naive Persistence,59.181079657863805,97.78948128166516
+4,land_value_capture,real,stgnn,Causal ST-GNN,15.530864184235634,39.759041281583265
+4,land_value_capture,real,mlp,Temporal MLP,18.191068290952195,33.39778738471251
+4,land_value_capture,real,slm,Spatial Lag Model,5.393293139191095,10.57799750351599
+4,land_value_capture,real,persistence,Naive Persistence,60.19837006612867,99.8207746354735
+5,land_value_capture,real,stgnn,Causal ST-GNN,14.462812271928128,34.35035477441296
+5,land_value_capture,real,mlp,Temporal MLP,21.1785887864764,38.02260059317581
+5,land_value_capture,real,slm,Spatial Lag Model,8.654625747594183,15.31458376530575
+5,land_value_capture,real,persistence,Naive Persistence,58.749986708648876,96.68560301407398
+6,land_value_capture,real,stgnn,Causal ST-GNN,13.654432250203707,41.27689876055937
+6,land_value_capture,real,mlp,Temporal MLP,15.038937954327656,27.877531928296627
+6,land_value_capture,real,slm,Spatial Lag Model,9.313049104603147,16.37132272408277
+6,land_value_capture,real,persistence,Naive Persistence,60.49589300759808,101.07550664428229
+7,land_value_capture,real,stgnn,Causal ST-GNN,14.693050067532788,39.38314985405596
+7,land_value_capture,real,mlp,Temporal MLP,17.227082529237684,32.48222431110537
+7,land_value_capture,real,slm,Spatial Lag Model,4.970114712453191,8.371980418018486
+7,land_value_capture,real,persistence,Naive Persistence,60.18216478771949,99.8498501280713
+8,land_value_capture,real,stgnn,Causal ST-GNN,14.919647234827492,36.59165256985888
+8,land_value_capture,real,mlp,Temporal MLP,14.715982662483794,22.96508924103355
+8,land_value_capture,real,slm,Spatial Lag Model,8.65220159355405,14.485866887852596
+8,land_value_capture,real,persistence,Naive Persistence,58.74134292032425,96.05912315809536
+9,land_value_capture,real,stgnn,Causal ST-GNN,13.360881599100377,38.15401059311052
+9,land_value_capture,real,mlp,Temporal MLP,15.027966151149256,31.69676579001022
+9,land_value_capture,real,slm,Spatial Lag Model,3.4957062627469413,5.694665935266158
+9,land_value_capture,real,persistence,Naive Persistence,60.33679257040928,99.94042997565873
+10,land_value_capture,real,stgnn,Causal ST-GNN,16.30374017762741,38.91094158843163
+10,land_value_capture,real,mlp,Temporal MLP,12.69495601732362,21.19739726490194
+10,land_value_capture,real,slm,Spatial Lag Model,8.750392085306235,14.258885151713445
+10,land_value_capture,real,persistence,Naive Persistence,59.961990523232345,99.1966554009196
+1,baseline,no_edges,stgnn,Causal ST-GNN,15.78485148121154,41.82038702375978
+2,baseline,no_edges,stgnn,Causal ST-GNN,12.542142353520514,35.89870640649823
+3,baseline,no_edges,stgnn,Causal ST-GNN,13.913491173583614,36.82102430462224
+4,baseline,no_edges,stgnn,Causal ST-GNN,12.863409405796116,38.13584503555895
+5,baseline,no_edges,stgnn,Causal ST-GNN,13.326102385502729,38.211173969816414
+6,baseline,no_edges,stgnn,Causal ST-GNN,14.613785640161666,38.910854670227124
+7,baseline,no_edges,stgnn,Causal ST-GNN,14.761034701854623,37.97589782138829
+8,baseline,no_edges,stgnn,Causal ST-GNN,12.712695941017564,35.19602557018084
+9,baseline,no_edges,stgnn,Causal ST-GNN,12.983583785231337,37.340055796398026
+10,baseline,no_edges,stgnn,Causal ST-GNN,15.100391407462988,38.180374285344506
+1,market_led,no_edges,stgnn,Causal ST-GNN,15.587296186148214,43.65352888345809
+2,market_led,no_edges,stgnn,Causal ST-GNN,12.799846893917408,36.515847696738504
+3,market_led,no_edges,stgnn,Causal ST-GNN,14.189974253316185,38.3956969541255
+4,market_led,no_edges,stgnn,Causal ST-GNN,15.325800838413123,41.38470843736634
+5,market_led,no_edges,stgnn,Causal ST-GNN,13.962134433691272,37.82211180819443
+6,market_led,no_edges,stgnn,Causal ST-GNN,14.258484620878024,41.22876180506899
+7,market_led,no_edges,stgnn,Causal ST-GNN,14.702195489139546,39.321956241302615
+8,market_led,no_edges,stgnn,Causal ST-GNN,14.84951778281888,36.926782145203724
+9,market_led,no_edges,stgnn,Causal ST-GNN,14.211218863766572,38.95214889927444
+10,market_led,no_edges,stgnn,Causal ST-GNN,16.374328117299363,40.8347795783148
+1,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,14.870459160115447,41.21763800790412
+2,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,12.724245525007772,33.99100314849164
+3,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,13.339241192650748,36.24664649822042
+4,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,15.011718645799784,39.07395019941283
+5,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,12.54934550891848,35.29751471391301
+6,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,14.021716643878007,38.99418448540927
+7,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,13.89133934300937,37.07773587246256
+8,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,14.498404662184495,35.443144735956615
+9,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,13.855732182530007,37.145081686987965
+10,inclusionary_housing,no_edges,stgnn,Causal ST-GNN,15.539689940581885,38.81411908096763
+1,land_value_capture,no_edges,stgnn,Causal ST-GNN,14.905489294796443,41.45786004239361
+2,land_value_capture,no_edges,stgnn,Causal ST-GNN,13.47527425808587,36.23396687371612
+3,land_value_capture,no_edges,stgnn,Causal ST-GNN,13.642675275837364,36.68345091358037
+4,land_value_capture,no_edges,stgnn,Causal ST-GNN,15.940543365803933,39.50234181112165
+5,land_value_capture,no_edges,stgnn,Causal ST-GNN,12.623504200939374,35.50567997932447
+6,land_value_capture,no_edges,stgnn,Causal ST-GNN,13.971098524667518,38.800747009556666
+7,land_value_capture,no_edges,stgnn,Causal ST-GNN,13.645149857513342,37.11398837497143
+8,land_value_capture,no_edges,stgnn,Causal ST-GNN,14.20831452906693,34.55086788820584
+9,land_value_capture,no_edges,stgnn,Causal ST-GNN,13.270413856507295,36.91062800649808
+10,land_value_capture,no_edges,stgnn,Causal ST-GNN,15.507932807859508,39.02203601959617
+1,baseline,shuffled,stgnn,Causal ST-GNN,13.506331108971278,38.351656801290154
+2,baseline,shuffled,stgnn,Causal ST-GNN,15.527505995392424,39.468638297433166
+3,baseline,shuffled,stgnn,Causal ST-GNN,15.823330681791898,36.55463954371831
+4,baseline,shuffled,stgnn,Causal ST-GNN,14.891223446644954,42.37791354969199
+5,baseline,shuffled,stgnn,Causal ST-GNN,12.987125419148173,35.302134582458166
+6,baseline,shuffled,stgnn,Causal ST-GNN,13.48267405582614,39.90925436230078
+7,baseline,shuffled,stgnn,Causal ST-GNN,14.219001580570064,38.703703186741066
+8,baseline,shuffled,stgnn,Causal ST-GNN,14.9526547516293,37.556390862303765
+9,baseline,shuffled,stgnn,Causal ST-GNN,14.644698553652026,39.74351457410649
+10,baseline,shuffled,stgnn,Causal ST-GNN,16.32280991147026,37.6487664156731
+1,market_led,shuffled,stgnn,Causal ST-GNN,16.649864768356345,44.63610259507004
+2,market_led,shuffled,stgnn,Causal ST-GNN,15.331061934531476,41.374933389363484
+3,market_led,shuffled,stgnn,Causal ST-GNN,13.675217725070638,36.38268321654191
+4,market_led,shuffled,stgnn,Causal ST-GNN,16.80583196837426,44.08238245985008
+5,market_led,shuffled,stgnn,Causal ST-GNN,15.110917708595862,38.567027779059
+6,market_led,shuffled,stgnn,Causal ST-GNN,16.166125989726183,42.38710732584757
+7,market_led,shuffled,stgnn,Causal ST-GNN,13.172378877494252,39.19435817054659
+8,market_led,shuffled,stgnn,Causal ST-GNN,14.696997528165562,37.53251183902097
+9,market_led,shuffled,stgnn,Causal ST-GNN,17.376296230687007,42.10391664364886
+10,market_led,shuffled,stgnn,Causal ST-GNN,13.833467266424664,36.576742633269
+1,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,15.96898345027085,41.71587810258202
+2,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,13.979039565902058,37.88358017192153
+3,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,13.440761967693623,34.51623165806064
+4,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,16.25123382233975,41.75156356022413
+5,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,14.839469716581595,36.46833770314786
+6,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,16.073810818304253,40.507385284904295
+7,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,12.60810795213708,36.93696442497895
+8,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,13.970643823118177,35.36212695151165
+9,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,16.8685957631176,39.67529604094238
+10,inclusionary_housing,shuffled,stgnn,Causal ST-GNN,14.674088517335285,36.92569232085272
+1,land_value_capture,shuffled,stgnn,Causal ST-GNN,16.234311899485537,42.28991959679783
+2,land_value_capture,shuffled,stgnn,Causal ST-GNN,13.762902349274254,38.27901614797235
+3,land_value_capture,shuffled,stgnn,Causal ST-GNN,13.953397144125208,34.68306399728117
+4,land_value_capture,shuffled,stgnn,Causal ST-GNN,16.39020945338216,41.72023349002716
+5,land_value_capture,shuffled,stgnn,Causal ST-GNN,14.895693317191297,36.66069446918184
+6,land_value_capture,shuffled,stgnn,Causal ST-GNN,16.17785978969421,40.96012638987447
+7,land_value_capture,shuffled,stgnn,Causal ST-GNN,12.629230563329706,37.144252039396044
+8,land_value_capture,shuffled,stgnn,Causal ST-GNN,14.225131411523499,35.60206522051769
+9,land_value_capture,shuffled,stgnn,Causal ST-GNN,16.832497977280603,40.01700646640331
+10,land_value_capture,shuffled,stgnn,Causal ST-GNN,12.682128761789318,34.15862171208285
