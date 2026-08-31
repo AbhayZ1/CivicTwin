@@ -1,0 +1,133 @@
+\section{Discussion, Limitations and Future Work}
+\label{sec:discussion}
+
+\subsection{Interpretation}
+
+Three findings carry beyond the specific model.
+
+First, \textbf{graph structure is not automatically informative}, even when the
+data-generating process contains explicit spillover. The static intercept
+collapse of Section~\ref{subsec:collapse} shows that spillover which is
+permanent and early is absorbed into node-level state and becomes
+observationally equivalent to a fixed effect. A benchmark constructed that way
+will report that graph models do not help, and the report will be correct about
+the benchmark while saying nothing about the method. Practitioners evaluating
+spatio-temporal architectures should verify that their spillover process
+remains dynamic \emph{within the evaluation window}, and we would encourage
+treating the shuffled-edge ablation as a standard diagnostic rather than an
+optional extra: it was the shuffled condition, not the edgeless one, that most
+clearly separated the working benchmark from the degenerate one.
+
+Second, \textbf{the advantage of nonlinear message passing is
+regime-dependent}. In the untreated equilibrium a linear spatial lag is
+statistically indistinguishable from \CGCEN{} ($p = 0.127$). Under active
+intervention the gap opens to roughly $3.3$ MAE with large effect sizes. The
+practical reading is that a planning agency running a steady-state monitoring
+model has little reason to prefer a graph neural network over classical spatial
+econometrics~\cite{anselin1988,lesage2009}, whereas one comparing prospective
+interventions with spatially propagating consequences does.
+
+Third, \textbf{index design can silently determine conclusions}. The
+growth-rate Displacement Pressure Index is internally coherent and, applied to
+a permanent policy shift, reports approximately zero effect. An analyst who did
+not interrogate the functional form could reasonably conclude that inclusionary
+housing has no displacement consequence, when in fact the index is structurally
+incapable of registering a sustained level difference. The level-aware
+correction of \eqref{eq:burden} changes the measured contrast by two orders of
+magnitude without altering a single simulated quantity.
+
+\subsection{Limitations}
+
+\subsubsection{No full-scale empirical evaluation}
+
+This is the principal limitation and we state it plainly: \textbf{all
+quantitative results in this paper are derived from synthetic data.} We
+implement a complete empirical pipeline---a loader that ingests a census-tract
+table with ACS and PLUTO fields (median gross rent B25064, median household
+income B19013, population B01003, housing units B25001, assessed land value,
+lot and residential area, and a derived transit accessibility score), builds
+tract adjacency from centroid geodesics by $k$-nearest neighbours under a
+haversine metric, and emits a PyTorch Geometric graph---and we validate it end
+to end. But we validate it on a \emph{schema-compatible sample}, not on a real
+extract. The loader reports its provenance through an explicit
+\texttt{is\_synthetic\_sample} flag precisely so that this distinction cannot
+be lost downstream, and we have not presented sample-derived numbers anywhere
+in this manuscript.
+
+Consequently the results establish \emph{internal} validity---given a
+data-generating process with known dynamic spillover, the architecture recovers
+it, and we can say exactly when it fails to. They establish nothing about
+external validity. Real tract panels are irregular, sparsely observed, subject
+to boundary changes across decennial revisions, and contain confounding that
+our generator does not simulate. Whether the conditional advantage we document
+survives contact with such data is untested, and we would regard any policy
+application of \CGCEN{} prior to that test as premature.
+
+\subsubsection{Scale and structure of the synthetic city}
+
+The $4 \times 4$ lattice with $16$ units and $18$ steps yields nine training
+windows. This is small, and it interacts with the results in a specific way:
+model capacity is cheap to waste, which is part of why the Temporal MLP is so
+variable ($\pm 7.97$ MAE) and why the linear SLM is competitive at all.
+Real metropolitan graphs are larger, irregular, and have heavy-tailed degree
+distributions that a regular lattice does not exercise. We do not claim the
+observed ordering transfers unchanged to that setting.
+
+\subsubsection{Simplified interventions and known ground truth}
+
+Policies are applied as multiplicative adjustments on fixed node sets with
+fixed timing. Real interventions are heterogeneous in intensity, phased,
+politically endogenous to the neighbourhoods that receive them, and often
+anticipated by markets before enactment. Treatment endogeneity in particular
+would break the exogeneity our design assumes, and addressing it requires
+identification machinery---instruments, difference-in-differences with spatial
+lags, or an explicit assignment model---that we have not incorporated.
+
+\subsubsection{Partial interference and the exposure summary}
+
+We assume interference operates only through the degree-normalised
+one-hop exposure of \eqref{eq:exposure}. This rules out longer-range effects
+that are not mediated by intervening units, and it compresses the neighbourhood
+assignment vector into a scalar. Both are standard simplifications in the
+interference literature~\cite{hudgens2008,forastiere2021}, and both are
+falsifiable: richer exposure mappings would be a direct extension.
+
+\subsection{Future Work}
+
+The immediate priority is \textbf{empirical replication}. Sourcing a genuine
+NYC ACS/PLUTO tract extract and re-running the benchmark against it is the
+single highest-value next step, and the loader exists to make it a
+configuration change rather than an engineering project. A useful intermediate
+would be a semi-synthetic design: real tract geometry, adjacency and initial
+conditions, with simulated interventions layered on, which preserves ground
+truth while introducing realistic spatial structure.
+
+Beyond that, three directions follow naturally. \emph{Richer exposure
+mappings} would relax the one-hop scalar assumption toward multi-hop or
+distance-weighted summaries. \emph{Uncertainty quantification} over the
+estimated ITE and STE would let the scorecard report credible intervals on
+policy contrasts rather than point estimates; conformal or ensemble approaches
+are the obvious candidates. \emph{Treatment assignment modelling} would move
+the framework from the ex-ante comparative setting, where assignment is
+stipulated, toward observational evaluation, where it must be estimated.
+
+\subsection{Conclusion}
+
+We presented CivicTwin, a counterfactual graph learning framework that
+decomposes urban policy effects into a direct term and a spatially
+interfering term under partial interference, with the split enforced
+architecturally rather than through regularisation. On a controlled synthetic
+benchmark across ten seeds and four policy scenarios, \CGCEN{} outperforms a
+spatial lag model, a graph-blind temporal MLP and naive persistence, and
+topology ablations confirm the advantage is carried by the graph: randomly
+rewiring the adjacency is more damaging than removing it entirely.
+
+The advantage is conditional, and we have tried to be precise about the
+condition. \CGCEN{} separates from classical spatial econometrics under active
+policy intervention ($p = 0.0015$--$0.0033$) but not in the untreated
+equilibrium ($p = 0.127$). Under an earlier generator in which spillover
+arrived as a single permanent shock, it separated from nothing at all---no
+model benefited from the graph, because permanent early spillover collapses
+into a static intercept. We report that negative result alongside the positive
+one because the boundary between the two regimes is, for anyone building
+spatio-temporal policy models, more actionable than either result alone.

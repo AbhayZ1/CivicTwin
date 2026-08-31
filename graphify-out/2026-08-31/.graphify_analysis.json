@@ -1,7 +1,51 @@
 {
   "communities": {
     "0": [
-      "civictwin_experiments_run_rq1_build_model_suite",
+      "civictwin_experiments_run_rq1_build_scenario_policies",
+      "civictwin_graph",
+      "civictwin_graph_build_graph",
+      "civictwin_graph_parse_args",
+      "civictwin_graph_py_any",
+      "civictwin_graph_py_namespace",
+      "civictwin_graph_py_ndarray",
+      "civictwin_graph_rationale_1",
+      "civictwin_graph_rationale_27",
+      "civictwin_policy",
+      "civictwin_policy_apply_policy",
+      "civictwin_policy_baseline_policy",
+      "civictwin_policy_inclusionary_housing_policy",
+      "civictwin_policy_land_value_capture_policy",
+      "civictwin_policy_market_led_policy",
+      "civictwin_policy_policy",
+      "civictwin_policy_policy_post_init",
+      "civictwin_policy_py_ndarray",
+      "civictwin_policy_rationale_1",
+      "civictwin_policy_rationale_13",
+      "civictwin_policy_rationale_34",
+      "civictwin_policy_rationale_39",
+      "civictwin_policy_rationale_44",
+      "civictwin_policy_rationale_49",
+      "civictwin_synth",
+      "civictwin_synth_build_lattice_adjacency",
+      "civictwin_synth_coerce_config",
+      "civictwin_synth_edge_index_from_adjacency",
+      "civictwin_synth_load_config",
+      "civictwin_synth_load_scenario_dataset",
+      "civictwin_synth_py_any",
+      "civictwin_synth_py_ndarray",
+      "civictwin_synth_py_path",
+      "civictwin_synth_rationale_1",
+      "civictwin_synth_rationale_118",
+      "civictwin_synth_rationale_73",
+      "civictwin_synth_rationale_96",
+      "civictwin_synth_scenario_panels",
+      "tests_test_cgcen_test_scenario_panels_cover_all_four_policies",
+      "tests_test_graph_policy_eval",
+      "tests_test_graph_policy_eval_test_baseline_policy_is_noop_and_eval_works",
+      "tests_test_graph_policy_eval_test_build_graph_uses_isolated_nodes_when_no_edges",
+      "tests_test_graph_policy_eval_test_policy_application_changes_selected_nodes_only"
+    ],
+    "1": [
       "civictwin_model",
       "civictwin_model_aggregate_neighbors",
       "civictwin_model_causaldecomposition",
@@ -41,8 +85,7 @@
       "tests_test_model",
       "tests_test_model_test_model_forward_shapes_are_valid"
     ],
-    "1": [
-      "any",
+    "2": [
       "civictwin_experiments_run_rq1",
       "civictwin_experiments_run_rq1_build_policy_scorecard",
       "civictwin_experiments_run_rq1_evaluate_model",
@@ -66,53 +109,22 @@
       "civictwin_experiments_run_rq1_shuffled_edge_index",
       "civictwin_experiments_run_rq1_summarize_causal_split",
       "civictwin_experiments_run_rq1_train_model",
-      "civictwin_experiments_run_rq1_treatment_vector",
       "civictwin_experiments_run_rq1_write_csv",
-      "civictwin_visualization_plot_generator_train_reference_model",
+      "civictwin_synth_generate_synthetic_city",
+      "civictwin_synth_rationale_146",
       "module",
       "tests_test_rq1",
       "tests_test_rq1_test_forecast_experiment_returns_seeded_result_row",
       "tests_test_rq1_test_learned_models_beat_naive_persistence_on_scaled_pipeline",
       "tests_test_rq1_test_policy_scorecard_includes_configured_scenarios",
-      "tests_test_rq1_test_stgnn_training_reduces_error_versus_untrained_model"
-    ],
-    "2": [
-      "civictwin_evaluate_affordability",
-      "civictwin_evaluate_compare_policies",
-      "civictwin_evaluate_py_dataframe",
-      "civictwin_experiments_run_rq1_build_scenario_policies",
-      "civictwin_graph",
-      "civictwin_graph_build_graph",
-      "civictwin_graph_parse_args",
-      "civictwin_graph_py_any",
-      "civictwin_graph_py_namespace",
-      "civictwin_graph_py_ndarray",
-      "civictwin_graph_rationale_1",
-      "civictwin_graph_rationale_27",
-      "civictwin_policy",
-      "civictwin_policy_apply_policy",
-      "civictwin_policy_baseline_policy",
-      "civictwin_policy_inclusionary_housing_policy",
-      "civictwin_policy_land_value_capture_policy",
-      "civictwin_policy_market_led_policy",
-      "civictwin_policy_policy",
-      "civictwin_policy_policy_post_init",
-      "civictwin_policy_py_ndarray",
-      "civictwin_policy_rationale_1",
-      "civictwin_policy_rationale_13",
-      "civictwin_policy_rationale_34",
-      "civictwin_policy_rationale_39",
-      "civictwin_policy_rationale_44",
-      "civictwin_policy_rationale_49",
-      "civictwin_synth_scenario_panels",
-      "tests_test_cgcen_test_scenario_panels_cover_all_four_policies",
-      "tests_test_graph_policy_eval",
-      "tests_test_graph_policy_eval_test_baseline_policy_is_noop_and_eval_works",
-      "tests_test_graph_policy_eval_test_build_graph_uses_isolated_nodes_when_no_edges",
-      "tests_test_graph_policy_eval_test_policy_application_changes_selected_nodes_only"
+      "tests_test_rq1_test_stgnn_training_reduces_error_versus_untrained_model",
+      "tests_test_synth",
+      "tests_test_synth_test_synth_is_reproducible_and_shapes_are_expected"
     ],
     "3": [
       "civictwin_evaluate",
+      "civictwin_evaluate_affordability",
+      "civictwin_evaluate_compare_policies",
       "civictwin_evaluate_cumulative_rent_burden",
       "civictwin_evaluate_derive_low_income_share",
       "civictwin_evaluate_displacement_pressure_index",
@@ -122,6 +134,7 @@
       "civictwin_evaluate_ht_params",
       "civictwin_evaluate_mae",
       "civictwin_evaluate_overburden_rate",
+      "civictwin_evaluate_py_dataframe",
       "civictwin_evaluate_py_ndarray",
       "civictwin_evaluate_regression_metrics",
       "civictwin_evaluate_rmse",
@@ -135,6 +148,8 @@
       "tests_test_cgcen_test_rmse_is_a_true_root_mean_squared_error"
     ],
     "4": [
+      "civictwin_experiments_run_rq1_build_model_suite",
+      "civictwin_experiments_run_rq1_treatment_vector",
       "civictwin_visualization_init",
       "civictwin_visualization_plot_generator",
       "civictwin_visualization_plot_generator_apply_style",
@@ -148,13 +163,15 @@
       "civictwin_visualization_plot_generator_lattice_shape",
       "civictwin_visualization_plot_generator_main",
       "civictwin_visualization_plot_generator_parse_args",
+      "civictwin_visualization_plot_generator_py_any",
+      "civictwin_visualization_plot_generator_py_dataframe",
+      "civictwin_visualization_plot_generator_py_namespace",
+      "civictwin_visualization_plot_generator_py_ndarray",
+      "civictwin_visualization_plot_generator_py_path",
       "civictwin_visualization_plot_generator_save_figure",
       "civictwin_visualization_plot_generator_to_grid",
-      "dataframe",
-      "figure",
-      "namespace",
-      "ndarray",
-      "path"
+      "civictwin_visualization_plot_generator_train_reference_model",
+      "figure"
     ],
     "5": [
       "civictwin_experiments_run_benchmark",
@@ -175,29 +192,10 @@
       "civictwin_experiments_run_benchmark_significance_tests",
       "civictwin_experiments_run_benchmark_summarize",
       "civictwin_experiments_run_benchmark_tidy_results",
-      "civictwin_experiments_run_benchmark_write"
+      "civictwin_experiments_run_benchmark_write",
+      "civictwin_synth_export_scenario_datasets"
     ],
     "6": [
-      "civictwin_synth",
-      "civictwin_synth_build_lattice_adjacency",
-      "civictwin_synth_coerce_config",
-      "civictwin_synth_edge_index_from_adjacency",
-      "civictwin_synth_export_scenario_datasets",
-      "civictwin_synth_generate_synthetic_city",
-      "civictwin_synth_load_config",
-      "civictwin_synth_load_scenario_dataset",
-      "civictwin_synth_py_any",
-      "civictwin_synth_py_ndarray",
-      "civictwin_synth_py_path",
-      "civictwin_synth_rationale_1",
-      "civictwin_synth_rationale_118",
-      "civictwin_synth_rationale_146",
-      "civictwin_synth_rationale_73",
-      "civictwin_synth_rationale_96",
-      "tests_test_synth",
-      "tests_test_synth_test_synth_is_reproducible_and_shapes_are_expected"
-    ],
-    "7": [
       "civictwin_paper_init",
       "civictwin_paper_latex_export",
       "civictwin_paper_latex_export_build_algorithm_block",
@@ -215,7 +213,7 @@
       "civictwin_paper_latex_export_significance_marker",
       "tests_test_cgcen_test_algorithm_block_is_wellformed_latex"
     ],
-    "8": [
+    "7": [
       "civictwin_data_empirical_loader",
       "civictwin_data_empirical_loader_build_panel",
       "civictwin_data_empirical_loader_build_tract_adjacency",
@@ -231,33 +229,7 @@
       "civictwin_data_init",
       "tests_test_cgcen_test_empirical_loader_builds_graph_from_tract_table"
     ],
-    "9": [
-      "claude",
-      "claude_1_research_identity_publication_goal",
-      "claude_2_formal_mathematical_engine",
-      "claude_3_execution_verification",
-      "claude_4_implementation_status_complete",
-      "claude_5_empirical_findings_rq1_is_supported",
-      "claude_6_known_defects",
-      "claude_7_recommended_next_step",
-      "claude_civictwin_causal_graph_counterfactual_exposure_network_cg_cen",
-      "claude_ieee_acm_journal_level_development_guidelines",
-      "claude_project_status_last_updated_2026_08_31_commit_feed8f4"
-    ],
-    "10": [
-      "readme",
-      "readme_causal_decomposition",
-      "readme_civictwin",
-      "readme_goals",
-      "readme_important_caveat",
-      "readme_known_limitations",
-      "readme_metrics",
-      "readme_quick_start",
-      "readme_reproduction_pipeline",
-      "readme_structure",
-      "readme_synthetic_assumptions"
-    ],
-    "11": [
+    "8": [
       "civictwin_scaling",
       "civictwin_scaling_featurescaler",
       "civictwin_scaling_featurescaler_check",
@@ -269,50 +241,27 @@
       "civictwin_scaling_py_ndarray",
       "civictwin_scaling_zscore"
     ],
-    "12": [
+    "9": [
       "civictwin_experiments_init",
       "civictwin_experiments_init_rationale_1"
     ],
-    "13": [
+    "10": [
       "civictwin_init",
       "civictwin_init_rationale_1"
-    ],
-    "14": [
-      "civictwin_visualization_plot_generator_py_any"
-    ],
-    "15": [
-      "civictwin_visualization_plot_generator_py_dataframe"
-    ],
-    "16": [
-      "civictwin_visualization_plot_generator_py_namespace"
-    ],
-    "17": [
-      "civictwin_visualization_plot_generator_py_ndarray"
-    ],
-    "18": [
-      "civictwin_visualization_plot_generator_py_path"
     ]
   },
   "cohesion": {
-    "0": 0.12010796221322537,
-    "1": 0.16287878787878787,
-    "2": 0.11742424242424243,
-    "3": 0.2761904761904762,
-    "4": 0.22631578947368422,
-    "5": 0.24561403508771928,
-    "6": 0.19607843137254902,
-    "7": 0.23333333333333334,
-    "8": 0.37362637362637363,
-    "9": 0.18181818181818182,
-    "10": 0.18181818181818182,
-    "11": 0.4,
-    "12": 1.0,
-    "13": 1.0,
-    "14": 1.0,
-    "15": 1.0,
-    "16": 1.0,
-    "17": 1.0,
-    "18": 1.0
+    "0": 0.08637873754152824,
+    "1": 0.12091038406827881,
+    "2": 0.1586452762923351,
+    "3": 0.2463768115942029,
+    "4": 0.18478260869565216,
+    "5": 0.23157894736842105,
+    "6": 0.23333333333333334,
+    "7": 0.37362637362637363,
+    "8": 0.4,
+    "9": 1.0,
+    "10": 1.0
   },
   "gods": [
     {
@@ -331,13 +280,13 @@
       "degree": 18
     },
     {
-      "id": "civictwin_policy_policy",
-      "label": "Policy",
-      "degree": 14
-    },
-    {
       "id": "civictwin_synth_scenario_panels",
       "label": "scenario_panels()",
+      "degree": 15
+    },
+    {
+      "id": "civictwin_policy_policy",
+      "label": "Policy",
       "degree": 14
     },
     {
@@ -348,7 +297,7 @@
     {
       "id": "civictwin_evaluate_displacement_pressure_index",
       "label": "displacement_pressure_index()",
-      "degree": 13
+      "degree": 14
     },
     {
       "id": "civictwin_experiments_run_benchmark_main",
@@ -361,8 +310,8 @@
       "degree": 12
     },
     {
-      "id": "civictwin_data_empirical_loader_load_empirical_city",
-      "label": "load_empirical_city()",
+      "id": "civictwin_experiments_run_rq1_train_model",
+      "label": "train_model()",
       "degree": 12
     }
   ],
@@ -390,6 +339,17 @@
       "why": "connects across different repos/directories; bridges separate communities"
     },
     {
+      "source": "test_build_graph_uses_isolated_nodes_when_no_edges()",
+      "target": "build_graph()",
+      "source_files": [
+        "tests/test_graph_policy_eval.py",
+        "civictwin/graph.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `test_build_graph_uses_isolated_nodes_when_no_edges()` unexpectedly reaches hub `build_graph()`"
+    },
+    {
       "source": "test_dpi_keeps_permanent_policy_shift_visible_at_long_horizon()",
       "target": "scenario_panels()",
       "source_files": [
@@ -410,21 +370,38 @@
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "connects across different repos/directories; peripheral node `test_scenario_panels_cover_all_four_policies()` unexpectedly reaches hub `scenario_panels()`"
-    },
-    {
-      "source": "test_baseline_policy_is_noop_and_eval_works()",
-      "target": "displacement_pressure_index()",
-      "source_files": [
-        "tests/test_graph_policy_eval.py",
-        "civictwin/evaluate.py"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities"
     }
   ],
-  "tokens": {
-    "input": 0,
-    "output": 0
-  }
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `SpatioTemporalGNN` connect `SpatioTemporalGNN` to `run_rq1.py`, `test_cgcen.py`, `plot_generator.py`?",
+      "why": "High betweenness centrality (0.121) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `run_forecast_experiment()` connect `run_rq1.py` to `synth.py`, `SpatioTemporalGNN`, `plot_generator.py`, `run_benchmark.py`?",
+      "why": "High betweenness centrality (0.055) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `FeatureScaler` connect `FeatureScaler` to `run_rq1.py`?",
+      "why": "High betweenness centrality (0.050) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 3 inferred relationships involving `SpatioTemporalGNN` (e.g. with `_predict()` and `run_forecast_experiment()`) actually correct?",
+      "why": "`SpatioTemporalGNN` has 3 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `synth.py` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08637873754152824 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `SpatioTemporalGNN` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.12091038406827881 - nodes in this community are weakly interconnected."
+    }
+  ]
 }

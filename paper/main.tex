@@ -1,0 +1,103 @@
+%% CivicTwin: A Counterfactual Graph Learning Framework for
+%% Ex-Ante Urban Policy Comparison
+%%
+%% Compile from the REPOSITORY ROOT so that the \input paths below resolve:
+%%     pdflatex paper/main.tex
+%%     bibtex   main
+%%     pdflatex paper/main.tex
+%%     pdflatex paper/main.tex
+
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage{balance}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{paper_assets/figures/}{../paper_assets/figures/}}
+
+\newcommand{\CGCEN}{CG-CEN}
+\newcommand{\HT}{\mathrm{H\!+\!T}}
+\newcommand{\DPI}{\mathrm{DPI}}
+\newcommand{\ITE}{\mathrm{ITE}}
+\newcommand{\STE}{\mathrm{STE}}
+
+\begin{document}
+
+\title{CivicTwin: A Counterfactual Graph Learning Framework\\
+for Ex-Ante Urban Policy Comparison}
+
+\author{%
+  \IEEEauthorblockN{Abhay Kumar Singh}%
+  \thanks{Manuscript prepared 31 August 2026. Source code, synthetic data
+  generator, benchmark harness and all figure/table assets are available at
+  \url{https://github.com/AbhayZ1/CivicTwin}.}%
+}
+
+\markboth{Preprint --- CivicTwin: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}%
+{Singh: CivicTwin: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}
+
+\maketitle
+
+\begin{abstract}
+Urban policy interventions---upzoning, inclusionary housing mandates,
+land-value capture---do not respect neighbourhood boundaries. A rezoning in one
+census tract changes rents in its neighbours, violating the Stable Unit
+Treatment Value Assumption (SUTVA) that underpins most quantitative policy
+evaluation. We present CivicTwin, a Causal Graph Counterfactual Exposure
+Network (\CGCEN{}) that treats ex-ante urban policy comparison as a causal
+inference problem under partial interference rather than as a point-forecasting
+problem. \CGCEN{} factorises each one-step-ahead prediction into a direct term
+$\Phi(X_{i,t}, P_{i,t})$, which carries the Individual Treatment Effect, and a
+neighbour-aggregated interference term $\sum_{j \in \mathcal{N}(i)} W_{ij}
+\Psi(X_{j,t}, P_{j,t})$, which carries the Spatial Interference Effect. The
+split is enforced architecturally: $\Phi$ reads a node-local temporal encoding
+that never touches a message-passing operator, so it cannot absorb neighbour
+information. We pair the model with two policy-facing indices---a Housing
+$+$ Transportation overburden index and a level-aware Displacement Pressure
+Index---and evaluate on a controlled synthetic city with a known
+data-generating process, across ten random seeds and four policy scenarios.
+
+Our central empirical finding is a boundary condition rather than a blanket
+claim. \CGCEN{} attains a pooled MAE of $8.88 \pm 2.40$ against $11.87 \pm
+3.12$ for a spatial lag model, $20.03 \pm 7.97$ for a non-graph temporal MLP,
+and $27.90 \pm 1.27$ for naive persistence. However, its advantage over the
+linear spatial baseline is statistically significant only under active policy
+intervention ($p = 0.0015$--$0.0033$ across the three intervention scenarios)
+and is \emph{not} significant in the untreated equilibrium ($p = 0.127$).
+Topology ablations show the graph is load-bearing: removing edges costs
+$+2.89$ MAE and randomly rewiring them costs $+4.88$ MAE, so a wrong topology
+is more damaging than no topology at all. We further report a negative result
+that shaped the design: under a generator whose spillover is a single permanent
+shock, no model---ours included---derives any measurable benefit from the
+graph, because permanent early spillover collapses into a static per-node
+intercept. Graph learning earns its keep for urban policy only when the
+spillover process is genuinely dynamic.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Causal inference, spatial interference, SUTVA, graph neural networks,
+urban policy evaluation, counterfactual analysis, displacement pressure,
+housing affordability.
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+
+\input{paper/sections/introduction.tex}
+\input{paper/sections/methodology.tex}
+\input{paper/sections/data_engine.tex}
+\input{paper/sections/experiments.tex}
+\input{paper/sections/discussion.tex}
+
+\balance
+\bibliographystyle{IEEEtran}
+\bibliography{paper/references}
+
+\end{document}
