@@ -123,15 +123,15 @@ magnitude in MAE.
 
 ## Known limitations
 
-- The generator applies multiplicative rent growth with no equilibrating supply response.
-  State variables hit the hard floors in `synth.py` (income clamps at 1000) around `t = 52`
-  at default settings; trajectories past that point reflect the clamp, not the dynamics.
-  Benchmarks use `n_steps = 18`, well inside the stable regime.
-- DPI is a growth-rate index, so a permanent policy level-shift appears only as a one-step
-  transient rather than a sustained offset.
-- `empirical_loader` ships a schema-compatible **sample** table, not real ACS/PLUTO data.
-  Supply a real extract via `load_empirical_city(table_path=...)`; `is_synthetic_sample`
-  reports which source was used.
+- All quantitative results are **synthetic**. `empirical_loader` ships a schema-compatible **sample** table, not real
+  ACS/PLUTO data. Supply a real extract via `load_empirical_city(table_path=...)`;
+  `is_synthetic_sample` reports which source was used. This is the main open limitation.
+- The `configs/legacy_static_shock.yaml` profile reproduces the pre-fix generator (single
+  permanent shock, no damping) under which no model benefits from the graph and state
+  variables collapse onto the hard floors at `t = 52`. It exists so that the negative
+  result reported in the paper stays auditable.
+- The ST-GNN's advantage over the Spatial Lag Model is significant only under active policy
+  intervention (p = 0.0015-0.0033); in the untreated baseline it is not (p = 0.127).
 
 ## Synthetic assumptions
 

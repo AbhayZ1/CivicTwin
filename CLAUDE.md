@@ -39,8 +39,8 @@ All five phases are implemented, benchmarked and pushed. `python -m pytest -q` �
 | LaTeX tables + IEEE algorithm block | `civictwin/paper/latex_export.py` → `paper_assets/` | done |
 
 Implementation notes that matter:
-- `Φ` is anchored on the last observation (residual forecasting). Removing that anchor costs
-  roughly an order of magnitude in MAE — do not "simplify" it away.
+- `Φ` is anchored on the last observation (residual forecasting). Ablating the anchor
+  degrades pooled MAE from 8.92 to 37.28 (factor 4.2) — do not "simplify" it away.
 - `causal_effects()` contrasts each term against its `P = 0` counterfactual, so the ITE is
   exactly 0 on untreated nodes and the STE is exactly 0 on an edgeless graph.
 - Python sources carry no `#` comments, per the code constraint.

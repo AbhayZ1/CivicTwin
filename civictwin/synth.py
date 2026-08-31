@@ -69,6 +69,22 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 }
 
 
+def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively merge override into base without dropping sibling keys.
+
+    A shallow update would replace a whole nested block, so a partial override
+    such as {"synth": {"pulse_rate": 0.5}} would silently discard every other
+    synth key.
+    """
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
 def _load_config(path: Optional[str | Path] = None) -> Dict[str, Any]:
     """Load config from YAML if available, else use the built-in defaults."""
     if path is not None:
@@ -77,18 +93,14 @@ def _load_config(path: Optional[str | Path] = None) -> Dict[str, Any]:
             with config_path.open("r", encoding="utf-8") as handle:
                 loaded = yaml.safe_load(handle) or {}
             if loaded:
-                merged = DEFAULT_CONFIG.copy()
-                merged.update(loaded)
-                return merged
+                return _deep_merge(DEFAULT_CONFIG, loaded)
 
     default_path = Path(__file__).resolve().parents[1] / "configs" / "default.yaml"
     if default_path.exists() and yaml is not None:
         with default_path.open("r", encoding="utf-8") as handle:
             loaded = yaml.safe_load(handle) or {}
         if loaded:
-            merged = DEFAULT_CONFIG.copy()
-            merged.update(loaded)
-            return merged
+            return _deep_merge(DEFAULT_CONFIG, loaded)
     return DEFAULT_CONFIG.copy()
 
 
@@ -133,7 +145,7 @@ def _coerce_config(config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return _load_config()
     merged = _load_config()
     if isinstance(config, dict):
-        merged.update(config)
+        merged = _deep_merge(merged, config)
     return merged
 
 

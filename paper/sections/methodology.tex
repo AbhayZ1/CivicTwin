@@ -77,9 +77,10 @@ concatenation, the prediction is
 The term $X_{i,t}$ inside $\Phi$ is a residual anchor: the network predicts the
 \emph{change} from the last observation rather than the level. This is not a
 cosmetic choice. Without it the GRU must reconstruct an absolute level through a
-saturating $\tanh$ bottleneck, and the resulting model is roughly an order of
-magnitude worse in MAE; the near-linear ``next $\approx$ last'' signal that
-dominates these series is destroyed by the recurrent nonlinearity. Because
+saturating $\tanh$ bottleneck. Ablating the anchor while holding everything else
+fixed degrades pooled MAE from $8.92$ to $37.28$, a factor of $4.2$; the
+near-linear ``next $\approx$ last'' signal that dominates these series is
+destroyed by the recurrent nonlinearity. Because
 $X_{i,t}$ is a function of unit $i$'s own state, the anchor is properly part of
 the direct term and does not contaminate the interference channel.
 

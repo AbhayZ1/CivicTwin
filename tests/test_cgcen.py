@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import numpy as np
 import torch
+import yaml
 
 from civictwin.data.empirical_loader import (
     NYC_TRACT_SCHEMA,
@@ -22,7 +25,7 @@ from civictwin.model import (
     SpatioTemporalGNN,
 )
 from civictwin.paper.latex_export import build_algorithm_block
-from civictwin.synth import scenario_panels
+from civictwin.synth import generate_synthetic_city, scenario_panels
 
 
 def _panel():
@@ -202,3 +205,45 @@ def test_algorithm_block_is_wellformed_latex():
     assert r"\begin{algorithmic}" in block
     assert r"\Phi" in block and r"\Psi" in block
     assert "ITE" in block and "STE" in block
+
+
+def test_default_generator_reaches_dynamic_equilibrium():
+    floors = {0: 5.0, 1: 1.0, 2: 100.0, 3: 1000.0, 4: 50.0}
+    panel = generate_synthetic_city(seed=1, n_neighborhoods=16, n_steps=101)["panel"]
+
+    for feature, floor in floors.items():
+        assert np.all(panel[:, :, feature] > floor + 1e-9)
+    assert np.isfinite(panel).all()
+    assert panel[:, -1, 1].mean() < 1e4
+
+
+def test_legacy_static_shock_profile_reproduces_the_negative_result():
+    config = yaml.safe_load(
+        Path("configs/legacy_static_shock.yaml").read_text(encoding="utf-8")
+    )
+    panel = generate_synthetic_city(
+        seed=1, n_neighborhoods=16, n_steps=101, config=config
+    )["panel"]
+
+    income = panel[:, :, 3]
+    onset = int(np.argmax((income <= 1000.0 + 1e-9).any(axis=0)))
+
+    assert onset == 52
+    assert np.all(income[:, -1] <= 1000.0 + 1e-9)
+    assert panel[:, -1, 1].mean() > 1e9
+
+
+def test_residual_anchor_is_load_bearing():
+    torch.manual_seed(0)
+    x = torch.randn(6, 4, 3) * 50.0 + 200.0
+    edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]], dtype=torch.long)
+
+    anchored = SpatioTemporalGNN(3, 8, 3, residual=True)
+    plain = SpatioTemporalGNN(3, 8, 3, residual=False)
+
+    with torch.no_grad():
+        anchored_out = anchored(x, edge_index)
+        plain_out = plain(x, edge_index)
+
+    assert (anchored_out - x[:, -1, :]).abs().mean() < (anchored_out).abs().mean()
+    assert plain_out.abs().max() < x[:, -1, :].abs().max()

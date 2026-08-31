@@ -23,7 +23,8 @@ root-mean-square of per-window absolute errors.
 
 The full design is $10$ seeds $\times$ $4$ scenarios $\times$ $4$ models for
 the main sweep, plus $10$ seeds $\times$ $4$ scenarios $\times$ $2$ ablated
-topologies for \CGCEN{}, giving $240$ fitted models. Aggregate statistics use
+topologies for \CGCEN{}, giving $240$ model instances of which $200$ are
+trained ($40$ persistence instances are parameter-free). Aggregate statistics use
 the sample standard deviation ($\mathrm{ddof} = 1$) and Student-$t$ $95\%$
 confidence intervals. Model comparisons use two-sided paired $t$-tests over
 seeds, pairing on the seed so that between-seed variance in task difficulty is

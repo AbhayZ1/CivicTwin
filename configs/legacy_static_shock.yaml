@@ -1,0 +1,99 @@
+# Legacy static-shock profile: reproduces the PRE-FIX generator.
+#
+# Spillover arrives as a single permanent accessibility step at t >= 3 and there is no
+# equilibrating supply response. Under this profile:
+#   - state variables collapse onto the hard floors in synth.py at t = 52
+#   - mean rent compounds to ~4e10 by t = 100
+#   - no model derives measurable benefit from the graph (removing edges is BETTER,
+#     shuffling edges is indistinguishable from the real topology)
+#
+# It is kept so the negative result reported in the paper stays auditable:
+#   cfg = yaml.safe_load(open('configs/legacy_static_shock.yaml'))
+#   generate_synthetic_city(seed=1, n_neighborhoods=16, n_steps=101, config=cfg)
+#
+# This is a COMPLETE config: civictwin.synth._coerce_config merges at the top level
+# only, so a partial override would silently drop sibling keys.
+
+seed: 42
+n_neighborhoods: 16
+n_steps: 12
+feature_names:
+- land_value
+- rent
+- population
+- median_income
+- housing_units
+- accessibility
+city:
+  lattice_rows: 4
+  lattice_cols: 4
+  neighbor_decay: 0.35
+  random_graph_p: 0.08
+synth:
+  accessibility_shock_strength: 2.0
+  accessibility_shock_nodes:
+  - 0
+  - 1
+  - 4
+  - 7
+  accessibility_shock_step: 3
+  land_value_to_rent: 0.45
+  rent_lag: 1
+  rent_spill_decay: 0.25
+  neighbor_shock_transmission: 0.1
+  pulse_rate: 0.0
+  pulse_strength: 0.0
+  pulse_start: 1
+  pulse_transmission: 0.0
+  logistic_damping: false
+  land_carrying_multiple: 12.0
+  income_carrying_multiple: 4.0
+  rent_carrying_ratio: 0.012
+  rent_target_ratio: 0.55
+  rent_reversion: 0.0
+  income_reversion: 0.0
+  income_pressure: 0.1
+  low_income_share_shift: 0.04
+  population_growth: 0.08
+  housing_growth: 0.03
+  base_land_value: 100.0
+  base_rent: 50.0
+  base_population: 2000.0
+  base_income: 60000.0
+  base_housing_units: 900.0
+  base_accessibility: 1.0
+policy:
+  market_led:
+    intensity: 0.8
+  inclusionary_housing:
+    intensity: 0.6
+  land_value_capture:
+    intensity: 0.7
+scoring:
+  weights:
+    alpha: 0.4
+    beta: 0.3
+    gamma: 0.3
+    delta: 0.3
+  overburden:
+    transit_base_cost: 20.0
+    transit_accessibility_elasticity: 1.0
+    annualization: 1.0
+    affordability_threshold: 0.45
+model:
+  hidden_dim: 8
+  num_layers: 1
+  dropout: 0.0
+training:
+  learning_rate: 1e-3
+  epochs: 5
+  batch_size: 4
+  scale_features: true
+benchmark:
+  seeds:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  window_size: 4
