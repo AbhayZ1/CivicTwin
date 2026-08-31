@@ -21,10 +21,10 @@
 
 ---
 
-## Project Status (last updated 2026-08-31, commit `ff79c7d`)
+## Project Status (last updated 2026-08-31, commit `feed8f4`+)
 
 ### 4. Implementation Status — COMPLETE
-All five phases are implemented, benchmarked and pushed. `python -m pytest -q` → **17 passed**.
+All five phases are implemented, benchmarked and pushed. `python -m pytest -q` → **19 passed**.
 
 | Component | Location | State |
 |---|---|---|
@@ -45,45 +45,51 @@ Implementation notes that matter:
   exactly 0 on untreated nodes and the STE is exactly 0 on an edgeless graph.
 - Python sources carry no `#` comments, per the code constraint.
 
-### 5. Empirical Findings — RQ1 IS NOT SUPPORTED
-10 seeds × 4 scenarios, pooled MAE on the real topology:
+### 5. Empirical Findings — RQ1 IS SUPPORTED
+10 seeds × 4 scenarios × 4 models, pooled MAE on the real topology (`results/`):
 
-| Model | MAE | vs ST-GNN (paired t-test) |
-|---|---|---|
-| Spatial Lag Model | **6.92 ± 2.42** | ST-GNN significantly **worse**, p < 1e-5 |
-| Causal ST-GNN | 14.82 ± 1.11 | — |
-| Temporal MLP | 16.74 ± 3.47 | not significant, p = 0.10–0.19 |
-| Naive Persistence | 60.04 ± 0.91 | ST-GNN wins, p < 1e-14 |
+| Model | MAE | RMSE | vs ST-GNN (paired t-test, per scenario) |
+|---|---|---|---|
+| **Causal ST-GNN (CG-CEN)** | **8.88 ± 2.40** | **13.81** | — |
+| Spatial Lag Model | 11.87 ± 3.12 | 19.29 | ST-GNN wins, p = 0.0015–0.0033 in 3/4; baseline n.s. (p = 0.13) |
+| Temporal MLP | 20.03 ± 7.97 | 34.54 | ST-GNN wins, p = 0.0006–0.0058 in all 4 |
+| Naive Persistence | 27.90 ± 1.27 | 37.54 | ST-GNN wins, p < 2e-8 in all 4 |
 
-**No model derives measurable benefit from the graph.** Three independent checks:
-1. ST-GNN with edges removed is *better* (14.16 vs 14.82); shuffled ≈ real (p = 0.70–0.93).
-2. SLM real 6.92 ≈ no-edges 7.26 (p = 0.15) ≈ shuffled 6.47 (p = 0.14).
-3. The SLM's learned spatial-lag coefficient ρ converges to ≈ 0 (−0.05, −0.07, 0.02).
+**The graph is now load-bearing** (`results/ablation_topology.csv`):
 
-Root cause: the accessibility shock is a **one-time permanent step** at `t ≥ 3` on fixed nodes.
-By the evaluation window (`t ≥ 12`) each neighbour's contribution is a constant per-node offset,
-already absorbed into the node's own level and recovered by the residual anchor. Spillover that
-is permanent and early is not identifiable from spillover baked into the level.
+| Topology | MAE | Degradation | p vs real |
+|---|---|---|---|
+| Real graph | 8.88 | — | — |
+| No edges | 11.77 | **+2.89** | 0.005–0.008 (3/4); baseline 0.080 |
+| Shuffled edges | 13.76 | **+4.88** | 0.0001–0.018 (all 4) |
 
-Do not claim graph superiority in the paper on the current generator. Do not re-derive this;
-it is settled by `results/ablation_topology.csv` and `results/benchmark_significance.csv`.
+Shuffled is *worse than no edges*: a wrong topology is actively harmful, which is the strongest
+available evidence that the model has learned the specific adjacency rather than generic
+neighbourhood averaging. Compare the pre-fix run, where no-edges **beat** the real graph
+(14.16 vs 14.82) and shuffled ≈ real (p = 0.70–0.93).
 
-### 6. Known Defects — BLOCKING FOR SUBMISSION
-1. **Generator degenerates before t = 100.** Income hits the hard floor `max(1000.0, ...)` in
-   `synth.py` at `t = 52`; by `t = 100` all 16 nodes are pinned there while rent compounds to
-   ~4e10. Anything past `t ≈ 52` measures the clamp, not the dynamics. Benchmarks use
-   `n_steps = 18`, inside the stable regime; `scenario_trajectories.pdf` shades the dead zone.
-2. **DPI cannot detect sustained policy effects.** As defined in §2 it is a growth-rate index,
-   so a permanent level shift produces one transient spike and returns to zero. This is why
-   every `pressure_delta` is ~1e-4. The implementation matches the formula; the formula is the
-   limitation.
+What changed: neighbour shocks are now **stochastic and recurring** (`pulse_rate = 0.22`,
+`pulse_strength = 1.2`, `pulse_transmission = 0.22`), so a neighbour's transient accessibility
+pulse at `t` moves ego rent at `t+1` and is not recoverable from ego history. Before the fix
+the shock was a single permanent step that decayed into a static per-node intercept, which the
+residual anchor already captured — hence the null result.
+
+### 6. Known Defects
+1. ~~Generator degenerates before t = 100~~ — **FIXED.** Logistic carrying capacities
+   (`land_carrying_multiple`, `income_carrying_multiple`, `rent_carrying_ratio`) plus mean
+   reversion (`rent_reversion`, `income_reversion`) hold a dynamic equilibrium: **no node
+   reaches any hard floor through t = 100**. Rent settles ≈ 1.6e3, income ≈ 1.5e5, H+T ≈ 0.011.
+2. ~~DPI cannot detect sustained policy effects~~ — **FIXED.** DPI gains a fourth term
+   `δ · B_{i,t}`, where `B` is cumulative rent burden relative to each node's own `t = 0`
+   H+T level. Policy deltas moved from ~1e-4 (transient) to ~1.7e-2 sustained. Setting
+   `delta = 0` recovers the exact §2 three-term formula; this is pinned by a test.
 3. **No real empirical data.** `empirical_loader` ships a schema-compatible *sample*, never
    presented as real ACS/PLUTO. Supply a genuine extract via
    `load_empirical_city(table_path=...)`; `is_synthetic_sample` reports which source was used.
+   This is the remaining blocker for submission.
 
 ### 7. Recommended Next Step
-Fix the generator, not the model: make neighbour shocks **recur during the evaluation window**
-(time-varying rather than a single permanent step), and add an equilibrating supply response so
-long horizons stay bounded. That is the only change that makes RQ1 testable. Re-running
-`run_benchmark` after the change takes ~25 min on CPU.
-
+Source a real NYC ACS/PLUTO tract extract and re-run the benchmark on it. The synthetic result
+is now internally valid; external validity is untested. Note that the ST-GNN's edge over the
+Spatial Lag Model is not significant in the untreated baseline scenario (p = 0.13) — it
+separates only under active policy interventions, which is the honest framing for the paper.

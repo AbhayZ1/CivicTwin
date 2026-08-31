@@ -307,27 +307,38 @@ def figure_scenario_trajectories(
 
     axes[0, 0].legend(frameon=False, loc="upper left", fontsize=7.5)
 
-    handles = [
-        Line2D([0], [0], color="#B00020", linestyle="--", linewidth=0.9),
-        Line2D([0], [0], color="#B00020", alpha=0.25, linewidth=8),
-    ]
-    axes[0, 1].legend(
-        handles,
-        [f"floor onset $t={onset}$" if onset is not None else "no floor onset", "degenerate regime"],
-        frameon=False,
-        fontsize=7,
-        loc="upper left",
-    )
+    if onset is not None and onset < horizon:
+        handles = [
+            Line2D([0], [0], color="#B00020", linestyle="--", linewidth=0.9),
+            Line2D([0], [0], color="#B00020", alpha=0.25, linewidth=8),
+        ]
+        axes[0, 1].legend(
+            handles,
+            [f"floor onset $t={onset}$", "degenerate regime"],
+            frameon=False,
+            fontsize=7,
+            loc="upper left",
+        )
 
     fig.suptitle(
         f"Scenario trajectories over $t=0..{horizon - 1}$ (city-mean, seed {seed})", fontsize=11
     )
     caption = (
         "Panels (b) and (d) show each intervention relative to the untreated baseline, the "
-        "comparative quantity of interest. Shaded region: at least one node has hit a hard "
-        "state floor in synth.py (income clamps at 1000), so trajectories beyond it reflect "
-        "the clamp rather than the generative dynamics and must not be interpreted."
+        "comparative quantity of interest. "
     )
+    if onset is not None and onset < horizon:
+        caption += (
+            "Shaded region: at least one node has hit a hard state floor in synth.py "
+            "(income clamps at 1000), so trajectories beyond it reflect the clamp rather "
+            "than the generative dynamics and must not be interpreted."
+        )
+    else:
+        caption += (
+            "Logistic carrying capacities and mean reversion hold the economy in dynamic "
+            "equilibrium: no node reaches a hard state floor over the full horizon, and "
+            "policy effects persist as sustained level offsets rather than transients."
+        )
     fig.text(0.5, -0.035, caption, ha="center", fontsize=7.2, style="italic", wrap=True)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     return save_figure(fig, output_dir, "scenario_trajectories")

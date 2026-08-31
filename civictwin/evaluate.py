@@ -11,7 +11,12 @@ EPS = 1e-8
 
 LAND_VALUE, RENT, POPULATION, INCOME, HOUSING_UNITS, ACCESSIBILITY = range(6)
 
-DEFAULT_DPI_WEIGHTS: Dict[str, float] = {"alpha": 0.4, "beta": 0.3, "gamma": 0.3}
+DEFAULT_DPI_WEIGHTS: Dict[str, float] = {
+    "alpha": 0.4,
+    "beta": 0.3,
+    "gamma": 0.3,
+    "delta": 0.3,
+}
 
 DEFAULT_HT_PARAMS: Dict[str, float] = {
     "transit_base_cost": 20.0,
@@ -31,7 +36,12 @@ def _ht_params(params: Optional[Dict[str, float]] = None) -> Dict[str, float]:
 def _dpi_weights(weights: Optional[Dict[str, float]] = None) -> Dict[str, float]:
     merged = dict(DEFAULT_DPI_WEIGHTS)
     if weights:
-        legacy = {"rent_growth": "alpha", "income_change": "beta", "housing_change": "gamma"}
+        legacy = {
+            "rent_growth": "alpha",
+            "income_change": "beta",
+            "housing_change": "gamma",
+            "burden_level": "delta",
+        }
         for key, value in weights.items():
             target = legacy.get(key, key)
             if target in merged:
@@ -88,11 +98,20 @@ def derive_low_income_share(panel: np.ndarray) -> np.ndarray:
     )
 
 
+def cumulative_rent_burden(
+    panel: np.ndarray, params: Optional[Dict[str, float]] = None
+) -> np.ndarray:
+    burden = housing_transport_index(panel, params)
+    reference = np.maximum(burden[:, :1], EPS)
+    return burden / reference - 1.0
+
+
 def displacement_pressure_index(
     panel: np.ndarray,
     weights: Optional[Dict[str, float]] = None,
     low_income_share: Optional[np.ndarray] = None,
     per_step: bool = False,
+    overburden_params: Optional[Dict[str, float]] = None,
 ) -> np.ndarray:
     merged = _dpi_weights(weights)
 
@@ -110,11 +129,13 @@ def displacement_pressure_index(
     rent_term = np.diff(rent, axis=1) / np.maximum(rent[:, :-1], EPS)
     share_term = 1.0 - low_income_share[:, 1:] / np.maximum(low_income_share[:, :-1], EPS)
     accessibility_term = np.diff(accessibility, axis=1)
+    burden_term = cumulative_rent_burden(panel, overburden_params)[:, 1:]
 
     index = (
         merged["alpha"] * rent_term
         + merged["beta"] * share_term
         + merged["gamma"] * accessibility_term
+        + merged["delta"] * burden_term
     )
     if per_step:
         return index
@@ -198,6 +219,7 @@ __all__ = [
     "overburden_rate",
     "derive_low_income_share",
     "displacement_pressure_index",
+    "cumulative_rent_burden",
     "compare_policies",
     "mae",
     "rmse",

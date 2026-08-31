@@ -44,6 +44,17 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "rent_lag": 1,
         "rent_spill_decay": 0.25,
         "neighbor_shock_transmission": 0.10,
+        "pulse_rate": 0.22,
+        "pulse_strength": 1.2,
+        "pulse_start": 1,
+        "pulse_transmission": 0.22,
+        "logistic_damping": True,
+        "land_carrying_multiple": 12.0,
+        "income_carrying_multiple": 4.0,
+        "rent_carrying_ratio": 0.012,
+        "rent_target_ratio": 0.55,
+        "rent_reversion": 0.05,
+        "income_reversion": 0.02,
         "income_pressure": 0.1,
         "low_income_share_shift": 0.04,
         "population_growth": 0.08,
@@ -173,6 +184,19 @@ def generate_synthetic_city(
     neighbor_decay = float(cfg.get("city", {}).get("neighbor_decay", 0.35))
     shock_transmission = float(synth_cfg.get("neighbor_shock_transmission", 0.10))
 
+    pulse_rate = float(synth_cfg.get("pulse_rate", 0.22))
+    pulse_strength = float(synth_cfg.get("pulse_strength", 1.2))
+    pulse_start = int(synth_cfg.get("pulse_start", 1))
+    pulse_transmission = float(synth_cfg.get("pulse_transmission", 0.22))
+
+    logistic_damping = bool(synth_cfg.get("logistic_damping", True))
+    land_carrying_multiple = float(synth_cfg.get("land_carrying_multiple", 12.0))
+    income_carrying_multiple = float(synth_cfg.get("income_carrying_multiple", 4.0))
+    rent_carrying_ratio = float(synth_cfg.get("rent_carrying_ratio", 0.012))
+    rent_target_ratio = float(synth_cfg.get("rent_target_ratio", 0.55))
+    rent_reversion = float(synth_cfg.get("rent_reversion", 0.05))
+    income_reversion = float(synth_cfg.get("income_reversion", 0.02))
+
     base_land_value = float(synth_cfg.get("base_land_value", 100.0))
     base_rent = float(synth_cfg.get("base_rent", 50.0))
     base_population = float(synth_cfg.get("base_population", 2000.0))
@@ -188,6 +212,18 @@ def generate_synthetic_city(
         panel[node, 0, 4] = base_housing * (1.0 + 0.04 * rng.normal())
         panel[node, 0, 5] = base_accessibility + 0.05 * rng.normal()
 
+    pulse = np.zeros((n_neighborhoods, n_steps), dtype=np.float64)
+    if pulse_rate > 0.0 and pulse_strength > 0.0:
+        active = rng.random((n_neighborhoods, n_steps)) < pulse_rate
+        magnitude = rng.uniform(
+            pulse_strength * 0.5, pulse_strength * 1.5, size=(n_neighborhoods, n_steps)
+        )
+        pulse = active * magnitude
+        pulse[:, :pulse_start] = 0.0
+
+    land_capacity = base_land_value * land_carrying_multiple
+    income_capacity = base_income * income_carrying_multiple
+
     for step in range(1, n_steps):
         local_neighbor_land = adjacency @ panel[:, step - 1, 0]
         local_neighbor_rent = adjacency @ panel[:, step - 1, 1]
@@ -195,16 +231,18 @@ def generate_synthetic_city(
         neighbor_land_term = local_neighbor_land / np.maximum(degrees, 1)
         neighbor_rent_term = local_neighbor_rent / np.maximum(degrees, 1)
 
-
         neighbor_shock_term = (
             adjacency @ (panel[:, step - 1, 5] - base_accessibility)
         ) / np.maximum(degrees, 1)
+
+        neighbor_pulse_term = (adjacency @ pulse[:, step - 1]) / np.maximum(degrees, 1)
 
         for node in range(n_neighborhoods):
             shock_indicator = 1.0 if node in shock_nodes and step >= shock_step else 0.0
             accessibility = (
                 base_accessibility
                 + shock_strength * shock_indicator
+                + pulse[node, step]
                 + 0.03 * np.sin(step + node) * (0.5 + 0.5 * rng.random())
             )
             panel[node, step, 5] = accessibility
@@ -215,23 +253,41 @@ def generate_synthetic_city(
             prev_income = panel[node, step - 1, 3]
             prev_housing = panel[node, step - 1, 4]
 
+            rent_capacity = max(rent_carrying_ratio * prev_income, 1.0)
+            land_headroom = max(0.0, 1.0 - prev_land / land_capacity) if logistic_damping else 1.0
+            rent_headroom = max(0.0, 1.0 - prev_rent / rent_capacity) if logistic_damping else 1.0
+            income_headroom = (
+                max(0.0, 1.0 - prev_income / income_capacity) if logistic_damping else 1.0
+            )
+
             spillover = neighbor_decay * neighbor_land_term[node]
             land_growth = 0.02 + 0.05 * accessibility + 0.12 * spillover / max(prev_land, 1.0)
-            panel[node, step, 0] = max(5.0, prev_land * (1.0 + land_growth))
+            panel[node, step, 0] = max(5.0, prev_land * (1.0 + land_growth * land_headroom))
 
             rent_growth = (
                 0.01
                 + 0.12 * (panel[node, step, 0] - prev_land) / max(prev_land, 1.0)
                 + 0.25 * neighbor_decay * neighbor_rent_term[node] / max(prev_rent, 1.0)
                 + shock_transmission * neighbor_shock_term[node]
+                + pulse_transmission * neighbor_pulse_term[node]
             )
-            panel[node, step, 1] = max(1.0, prev_rent * (1.0 + rent_growth))
+            panel[node, step, 1] = max(
+                1.0,
+                prev_rent
+                * (1.0 + rent_growth * rent_headroom)
+                + rent_reversion * (rent_capacity * rent_target_ratio - prev_rent),
+            )
 
-            population_growth = 0.01 + 0.02 * accessibility - 0.04 * (panel[node, step, 1] / max(prev_income, 1.0))
+            burden = panel[node, step, 1] / max(prev_income, 1.0)
+            population_growth = 0.01 + 0.02 * accessibility - 0.04 * burden
             panel[node, step, 2] = max(100.0, prev_population * (1.0 + population_growth))
 
-            income_growth = 0.005 + 0.02 * accessibility - 0.03 * (panel[node, step, 1] / max(prev_income, 1.0))
-            panel[node, step, 3] = max(1000.0, prev_income * (1.0 + income_growth))
+            income_growth = 0.005 + 0.02 * accessibility - 0.03 * burden
+            panel[node, step, 3] = max(
+                1000.0,
+                prev_income * (1.0 + income_growth * income_headroom)
+                + income_reversion * (base_income - prev_income),
+            )
 
             housing_growth = 0.01 + 0.02 * accessibility - 0.01 * (panel[node, step, 1] / max(prev_rent, 1.0))
             panel[node, step, 4] = max(50.0, prev_housing * (1.0 + housing_growth))

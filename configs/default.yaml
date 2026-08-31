@@ -25,6 +25,17 @@ synth:
   rent_lag: 1
   rent_spill_decay: 0.25
   neighbor_shock_transmission: 0.10
+  pulse_rate: 0.22
+  pulse_strength: 1.2
+  pulse_start: 1
+  pulse_transmission: 0.22
+  logistic_damping: true
+  land_carrying_multiple: 12.0
+  income_carrying_multiple: 4.0
+  rent_carrying_ratio: 0.012
+  rent_target_ratio: 0.55
+  rent_reversion: 0.05
+  income_reversion: 0.02
   income_pressure: 0.1
   low_income_share_shift: 0.04
   population_growth: 0.08
@@ -49,6 +60,7 @@ scoring:
     alpha: 0.4
     beta: 0.3
     gamma: 0.3
+    delta: 0.3
 
   overburden:
     transit_base_cost: 20.0

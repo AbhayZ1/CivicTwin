@@ -7,6 +7,7 @@ from civictwin.data.empirical_loader import (
     load_empirical_city,
 )
 from civictwin.evaluate import (
+    cumulative_rent_burden,
     displacement_pressure_index,
     housing_transport_index,
     mae,
@@ -54,10 +55,10 @@ def test_ht_index_matches_specification_formula():
     assert np.allclose(transit_cost(panel, params), 20.0 / panel[:, :, 5])
 
 
-def test_dpi_matches_specification_formula():
+def test_dpi_reduces_to_specification_formula_when_delta_is_zero():
     panel = _panel()
     share = np.array([[0.50, 0.45, 0.40], [0.60, 0.62, 0.64]])
-    weights = {"alpha": 0.4, "beta": 0.3, "gamma": 0.3}
+    weights = {"alpha": 0.4, "beta": 0.3, "gamma": 0.3, "delta": 0.0}
 
     result = displacement_pressure_index(
         panel, weights=weights, low_income_share=share, per_step=True
@@ -74,6 +75,37 @@ def test_dpi_matches_specification_formula():
     assert result.shape == (2, 2)
     assert np.allclose(result, expected)
     assert displacement_pressure_index(panel, weights, share).shape == (2,)
+
+
+def test_dpi_level_term_adds_cumulative_rent_burden():
+    panel = _panel()
+    share = np.array([[0.50, 0.45, 0.40], [0.60, 0.62, 0.64]])
+    weights = {"alpha": 0.4, "beta": 0.3, "gamma": 0.3, "delta": 0.5}
+
+    with_level = displacement_pressure_index(
+        panel, weights=weights, low_income_share=share, per_step=True
+    )
+    without_level = displacement_pressure_index(
+        panel, weights={**weights, "delta": 0.0}, low_income_share=share, per_step=True
+    )
+    burden = cumulative_rent_burden(panel)
+
+    assert np.allclose(burden[:, 0], 0.0)
+    assert np.allclose(with_level - without_level, 0.5 * burden[:, 1:])
+
+
+def test_dpi_keeps_permanent_policy_shift_visible_at_long_horizon():
+    city = scenario_panels(seed=1, n_neighborhoods=9, n_steps=40)
+    baseline = city["scenarios"]["baseline"]
+    market = city["scenarios"]["market_led"]
+
+    late = slice(-8, None)
+    delta = (
+        displacement_pressure_index(market, per_step=True).mean(axis=0)[late]
+        - displacement_pressure_index(baseline, per_step=True).mean(axis=0)[late]
+    )
+
+    assert np.all(delta > 1e-3)
 
 
 def test_rmse_is_a_true_root_mean_squared_error():
