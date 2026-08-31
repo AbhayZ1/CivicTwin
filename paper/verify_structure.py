@@ -13,7 +13,7 @@ GRAPHICS_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
 LABEL_RE = re.compile(r"\\label\{([^}]+)\}")
 REF_RE = re.compile(r"\\(?:ref|eqref)\{([^}]+)\}")
 CITE_RE = re.compile(r"\\cite\{([^}]+)\}")
-BIBKEY_RE = re.compile(r"^@\w+\{([^,]+),", re.MULTILINE)
+BIBKEY_RE = re.compile(r"\\bibitem\{([^}]+)\}")
 
 
 def strip_comments(text: str) -> str:
@@ -82,7 +82,7 @@ def main() -> int:
             if not child.exists():
                 problems.append(f"missing \\input target: {target} (from {source.name})")
 
-    graphics_dirs = [ROOT / "paper_assets" / "figures"]
+    graphics_dirs = [ROOT / "paper", ROOT / "paper_assets" / "figures"]
     for name in GRAPHICS_RE.findall(flat):
         if not any((d / name).exists() for d in graphics_dirs):
             problems.append(f"missing figure: {name}")
@@ -92,8 +92,7 @@ def main() -> int:
         if ref not in labels:
             problems.append(f"undefined \\ref/\\eqref target: {ref}")
 
-    bib = ROOT / "paper" / "references.bib"
-    bibkeys = set(BIBKEY_RE.findall(bib.read_text(encoding="utf-8"))) if bib.exists() else set()
+    bibkeys = set(BIBKEY_RE.findall(flat))
     cited: set[str] = set()
     for group in CITE_RE.findall(flat):
         cited.update(k.strip() for k in group.split(","))

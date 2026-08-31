@@ -1,11 +1,10 @@
 %% CivicTwin: A Counterfactual Graph Learning Framework for
 %% Ex-Ante Urban Policy Comparison
 %%
-%% Compile from the REPOSITORY ROOT so that the \input paths below resolve:
-%%     pdflatex paper/main.tex
-%%     bibtex   main
-%%     pdflatex paper/main.tex
-%%     pdflatex paper/main.tex
+%% Single self-contained source. Upload the four figure PDFs
+%%   spillover_heatmaps.pdf  scenario_trajectories.pdf
+%%   model_comparison_bar.pdf  ablation_topology.pdf
+%% alongside this file and compile with pdflatex (twice, for cross-references).
 
 \documentclass[journal]{IEEEtran}
 
@@ -14,91 +13,1013 @@
 \usepackage{amsfonts}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{multirow}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{url}
-\usepackage{balance}
 \usepackage[hidelinks]{hyperref}
 
-\graphicspath{{paper_assets/figures/}{../paper_assets/figures/}}
-
-\newcommand{\CGCEN}{CG-CEN}
-\newcommand{\HT}{\mathrm{H\!+\!T}}
+\newcommand{\CGCEN}{CG\mbox{-}CEN}
+\newcommand{\HT}{\mathrm{H}\!+\!\mathrm{T}}
 \newcommand{\DPI}{\mathrm{DPI}}
-\newcommand{\ITE}{\mathrm{ITE}}
-\newcommand{\STE}{\mathrm{STE}}
 
 \begin{document}
 
-\title{CivicTwin: A Counterfactual Graph Learning Framework\\
-for Ex-Ante Urban Policy Comparison}
+\title{CivicTwin: A Counterfactual Graph Learning\\
+Framework for Ex-Ante Urban Policy Comparison}
 
 \author{Abhay~Mahantesh~Zalaki,
         Ayush~Raj,
         and~Prabin~S~M%
-  \thanks{Manuscript prepared 31 August 2026. Source code, synthetic data
-  generator, benchmark harness and all figure/table assets are available at
-  \url{https://github.com/AbhayZ1/CivicTwin}.}%
-}
+\thanks{Manuscript prepared 31 August 2026. The generator, the benchmark
+harness and the scripts which produce every figure and table below are
+available at \url{https://github.com/AbhayZ1/CivicTwin}.}}
 
-\markboth{Preprint --- CivicTwin: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}%
-{Zalaki \MakeLowercase{\textit{et al.}}: CivicTwin: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}
+\markboth{Preprint}{Zalaki \MakeLowercase{\textit{et al.}}: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}
 
 \maketitle
 
 \begin{abstract}
-Urban policy interventions---upzoning, inclusionary housing mandates,
-land-value capture---do not respect neighbourhood boundaries. A rezoning in one
-census tract changes rents in its neighbours, violating the Stable Unit
-Treatment Value Assumption (SUTVA) that underpins most quantitative policy
-evaluation. We present CivicTwin, a Causal Graph Counterfactual Exposure
-Network (\CGCEN{}) that treats ex-ante urban policy comparison as a causal
-inference problem under partial interference rather than as a point-forecasting
-problem. \CGCEN{} factorises each one-step-ahead prediction into a direct term
-$\Phi(X_{i,t}, P_{i,t})$, which carries the Individual Treatment Effect, and a
-neighbour-aggregated interference term $\sum_{j \in \mathcal{N}(i)} W_{ij}
-\Psi(X_{j,t}, P_{j,t})$, which carries the Spatial Interference Effect. The
-split is enforced architecturally: $\Phi$ reads a node-local temporal encoding
-that never touches a message-passing operator, so it cannot absorb neighbour
-information. We pair the model with two policy-facing indices---a Housing
-$+$ Transportation overburden index and a level-aware Displacement Pressure
-Index---and evaluate on a controlled synthetic city with a known
-data-generating process, across ten random seeds and four policy scenarios.
+Ex-ante policy comparison asks which of several candidate interventions a city
+should prefer, before any of them is enacted. We treat this as a problem of
+causal inference under spatial interference rather than as one of forecasting.
+An intervention applied to one neighbourhood alters rents in the neighbourhoods
+adjacent to it, so the Stable Unit Treatment Value Assumption fails, and an
+estimator which ignores the failure attributes the neighbour response to the
+control condition.
 
-Our central empirical finding is a boundary condition rather than a blanket
-claim. \CGCEN{} attains a pooled MAE of $8.88 \pm 2.40$ against $11.87 \pm
-3.12$ for a spatial lag model, $20.03 \pm 7.97$ for a non-graph temporal MLP,
-and $27.90 \pm 1.27$ for naive persistence. However, its advantage over the
-linear spatial baseline is statistically significant only under active policy
-intervention ($p = 0.0015$--$0.0033$ across the three intervention scenarios)
-and is \emph{not} significant in the untreated equilibrium ($p = 0.127$).
-Topology ablations show the graph is load-bearing: removing edges costs
-$+2.89$ MAE and randomly rewiring them costs $+4.88$ MAE, so a wrong topology
-is more damaging than no topology at all. We further report a negative result
-that shaped the design: under a generator whose spillover is a single permanent
-shock, no model---ours included---derives any measurable benefit from the
-graph, because permanent early spillover collapses into a static per-node
-intercept. Graph learning earns its keep for urban policy only when the
-spillover process is genuinely dynamic.
+We propose the Causal Graph Counterfactual Exposure Network (\CGCEN{}), in which
+the one-step-ahead prediction for a neighbourhood splits into a direct term
+$\Phi$, evaluated at the unit itself, and an interference term obtained by
+aggregating a second function $\Psi$ over the neighbours with row-normalised
+weights. The two channels are kept apart by the architecture and not by a
+penalty: $\Phi$ reads a temporal encoding which no message-passing operator has
+touched, so neighbour state cannot reach it. Contrasting each channel against
+its untreated counterfactual returns an individual treatment effect which is
+zero at every untreated unit and an interference effect which is zero on an
+edgeless graph. Alongside the model we define a housing-plus-transportation
+overburden index and a displacement pressure index carrying a cumulative
+burden term.
+
+On a synthetic city with a known generating process, over ten seeds and four
+policy scenarios, \CGCEN{} attains pooled MAE $8.88 \pm 2.40$, against
+$11.87 \pm 3.12$ for a spatial lag model, $20.03 \pm 7.97$ for a temporal MLP
+which cannot see the graph, and $27.90 \pm 1.27$ for persistence. The margin
+over the spatial lag model is significant under each of the three interventions
+($p = 0.0015$ to $0.0033$) and is not significant in the untreated equilibrium
+($p = 0.127$), which we report rather than pool away. Deleting the edges costs
+$2.89$ MAE and permuting them costs $4.88$, so a wrong graph does more damage
+than no graph. We also report a negative result which shaped the design. Under
+a generator whose spillover arrives once and stays, no model we tried gained
+anything from the graph, because spillover of that kind is absorbed into the
+level of each unit and becomes a fixed effect. Graph learning repays its cost
+here only when the spillover process keeps moving.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Causal inference, spatial interference, SUTVA, graph neural networks,
-urban policy evaluation, counterfactual analysis, displacement pressure,
-housing affordability.
+Causal inference, spatial interference, SUTVA, graph neural networks, urban
+policy evaluation, counterfactual analysis, displacement pressure.
 \end{IEEEkeywords}
 
 \IEEEpeerreviewmaketitle
 
-\input{paper/sections/introduction.tex}
-\input{paper/sections/methodology.tex}
-\input{paper/sections/data_engine.tex}
-\input{paper/sections/experiments.tex}
-\input{paper/sections/discussion.tex}
+\section{Introduction}
+\label{sec:intro}
 
-\balance
-\bibliographystyle{IEEEtran}
-\bibliography{paper/references}
+\IEEEPARstart{U}{rban} policy is written for parcels and districts, and its
+consequences ignore those boundaries. Upzoning a corridor, relaxing parking
+minima or capturing land value to pay for transit changes rents and land values
+inside the treated zone, and it also changes them next door, through housing
+search, through commuting, and through what developers expect to happen next.
+For the question a planner actually asks, which is who is displaced and where,
+the diffusion is not a nuisance. It is the object of interest.
+
+\textbf{Interference and SUTVA.} The potential outcomes framework rests on the
+Stable Unit Treatment Value Assumption \cite{rubin1980}, under which the outcome
+of a unit depends on the treatment given to that unit and on nothing else.
+Spatial spillover breaks the assumption outright. A tract next to an upzoned
+corridor has been partially treated although it received no intervention, and an
+estimator which files it under the control condition will read the rent movement
+there as noise, or as evidence that the policy did less than it did. The
+literature on partial interference \cite{hudgens2008,ogburn2014,forastiere2021}
+handles this by letting the outcome depend on a low dimensional summary of the
+neighbours' assignments. We take that route and put the summary in a learned
+spatio-temporal model.
+
+\textbf{Comparison, not prediction.} There is a second difficulty, less often
+discussed. Work on urban and mobility data usually poses the task as
+forecasting: what will rents be next month, what will traffic be next hour.
+Spatio-temporal graph networks are good at this \cite{li2018dcrnn,yu2018stgcn}.
+But an agency choosing between an inclusionary mandate and a land-value capture
+scheme is not asking what rents will be in 2031. It is asking which of several
+worlds, none of which has happened, is preferable, and for whom. A point
+forecast can be accurate and useless for that purpose, because it cannot be
+conditioned on an intervention which has not occurred.
+
+We therefore fix the scope of the paper as ex-ante comparison. The quantity of
+interest is not $\hat{Y}_{i,t+1}$ on its own but the difference between
+$\hat{Y}_{i,t+1}$ under an intervention and under the untreated counterfactual,
+taken together with the same difference at the neighbours of $i$. Forecast
+accuracy enters as a necessary condition and not as the goal. A model whose
+conditional expectations are poorly calibrated cannot be trusted to produce
+differences between them.
+
+\textbf{\CGCEN{}: an introduction.} Let $w_i \in \{0,1\}$ record whether
+neighbourhood $i$ receives the intervention. Write $\mathcal{N}(i)$ for the
+neighbours of $i$ and $W_{ij}$ for the row-normalised adjacency weights. The
+model predicts
+\begin{equation}
+  \hat{Y}_{i,t+1} \;=\; \Phi(X_{i,t}, P_{i,t})
+  \;+\; \sum_{j \in \mathcal{N}(i)} W_{ij} \cdot \Psi(X_{j,t}, P_{j,t}),
+  \label{eq:intro-split}
+\end{equation}
+where $\Phi$ carries the individual treatment effect and $\Psi$, once
+aggregated, carries the spatial interference effect. Nothing in
+\eqref{eq:intro-split} is unusual as an equation. What matters is where the two
+functions get their arguments from. The encoding fed to $\Phi$ is produced by a
+recurrent pass over the history of unit $i$ alone, with no message passing
+anywhere in it, so there is no route by which the state of a neighbour can enter
+the direct term. The encoding fed to $\Psi$ is evaluated at the neighbours and
+aggregated across edges, and it is the only such route. The separation is a
+property of the wiring, not of a penalty which might or might not bind.
+
+Two identities follow at once, and we use both as regression tests. If
+$P_{i,t}=0$ then the treatment effect at $i$ is exactly zero, because the treated
+and untreated arguments of $\Phi$ coincide. If the edge set is empty then the
+interference effect is exactly zero, because the sum in \eqref{eq:intro-split}
+is empty. Neither identity is learned and neither can drift.
+
+\textbf{Why a synthetic city.} Credible spatial policy data with a known ground
+truth is scarce, and evaluating a spillover-aware estimator on observational
+data is close to circular: the spillover structure is exactly what is unknown,
+so a model which appears to exploit it cannot be told apart from one which has
+fitted confounding. We therefore build a generator whose process we specify
+completely, which lets us ask a question the observational setting cannot
+answer. When the spillover is known to be there, does the graph model find it?
+The answer turned out to depend on what kind of spillover it is, and that
+dependence is the main thing we have to report.
+
+\textbf{Summary of results.} The contributions are as follows.
+
+\begin{itemize}
+\item[--] Section \ref{sec:model} gives the architecture in which the direct and
+interference channels are separated by construction, together with the
+counterfactual contrasts which recover the two effects and the two degenerate
+cases in which they vanish exactly.
+
+\item[--] Section \ref{sec:model} also revises the displacement pressure index.
+An index built only from growth rates cannot register a sustained policy effect:
+a permanent shift in level moves the growth rate once and then the index returns
+to its old path. Adding a cumulative burden term raises the measured contrast
+between scenarios by more than two orders of magnitude, from around $10^{-4}$ to
+around $1.7 \times 10^{-2}$.
+
+\item[--] Section \ref{sec:generator} reports the negative result. Under a
+generator in which the spillover is a single permanent shock, no model gained
+from the graph. Deleting the edges improved the network, permuting them changed
+nothing, and the learned spatial coefficient of the spatial lag model went to
+zero. We give the mechanism, which is that early permanent spillover is
+absorbed into the level of the receiving unit and is thereafter
+indistinguishable from a fixed effect.
+
+\item[--] Section \ref{sec:experiments} reports the benchmark on the repaired
+generator. \CGCEN{} is ahead of every baseline pooled over scenarios, and its
+margin over the spatial lag model is significant under intervention
+($p = 0.0015$ to $0.0033$) but not in the untreated equilibrium
+($p = 0.127$). Permuting the edges is worse than deleting them.
+
+\item[--] The generator, the four-model baseline suite, the ten-seed harness
+with confidence intervals and paired tests, and the topology ablations are
+released, along with a configuration profile which reproduces the degenerate
+regime so that the negative result stays auditable.
+\end{itemize}
+
+We put some weight on the third item. It is the kind of finding which normally
+disappears during model development, and had it disappeared here we would have
+published a paper claiming that a graph network captures urban spillover, on a
+benchmark which contained no spillover it could capture. Reporting where the
+boundary lies seems more useful than reporting only the side of it on which the
+method wins.
+
+\textbf{Related work.} Three lines of work meet here. Causal inference under
+interference relaxes SUTVA by allowing the outcome of a unit to depend on the
+assignments of others. Hudgens and Halloran \cite{hudgens2008} formalise partial
+interference within disjoint clusters, Ogburn and VanderWeele \cite{ogburn2014}
+give a graphical treatment, and Forastiere et al. \cite{forastiere2021} extend
+identification to observational networks through an explicit exposure mapping.
+We borrow the exposure mapping and place it inside a learned model rather than a
+parametric outcome regression.
+
+Neural counterfactual estimation learns representations for treatment effect
+estimation, usually under SUTVA. Shalit et al. \cite{shalit2017cfr} give
+generalisation bounds for individual effects and Wager and Athey
+\cite{wager2018causalforest} give inference for forest-based heterogeneous
+effects. Closest to our setting is Ma and Tresp \cite{ma2021netdeconf}, who
+carry neural counterfactual estimation to networked interference. What we add
+relative to that line is the architectural separation of the two channels and
+the temporal dimension.
+
+Spatio-temporal graph learning has been driven largely by traffic forecasting.
+Kipf and Welling \cite{kipf2017gcn} introduced the graph convolution we take as
+a reference point, and DCRNN \cite{li2018dcrnn} and STGCN \cite{yu2018stgcn} set
+the recurrent and convolutional templates. These are forecasting models fitted
+to observational series. Neither exposes a treatment channel or a counterfactual
+contrast, which is what comparison requires. On the measurement side we follow
+the combined housing and transportation framing of the H$+$T index
+\cite{cnt2023ht}, and our displacement indicators are informed by Zuk et al.
+\cite{zuk2018gentrification}, who document that public investment can raise
+accessibility and displacement risk at the same time. That tension is what the
+H$+$T index is built to expose.
+
+\textbf{Notation.} Units are indexed by $i$ and $j$ and time steps by $t$. We
+write $X_{i,t} \in \mathbb{R}^{F}$ for the feature vector of unit $i$ at step
+$t$, $P_{i,t} \in \{0,1\}$ for the policy assignment, $d_i$ for the degree of
+$i$, and $W_h$ for the length of the history window. Errors are always pooled
+over windows, units and features before they are reduced, so RMSE below is a
+root mean squared error and not a root mean square of per-window absolute
+errors. Standard deviations use the sample convention and confidence intervals
+are Student-$t$ at the $95\%$ level. All comparisons between models are paired
+on the seed.
+
+\section{The model}
+\label{sec:model}
+
+\subsection{Graph and exposure}
+
+Let $G = (V, E, W)$ be an undirected weighted graph on $|V| = N$ units, a census
+tract in the empirical setting and a lattice cell in the synthetic one, with
+edges recording spatial adjacency. Write $\mathcal{N}(i)$ for the neighbours of
+$i$. The weight matrix is the row-normalised adjacency,
+\begin{equation}
+  W_{ij} =
+  \begin{cases}
+    a_{ij} \big/ \sum_{k} a_{ik}, & (i,j) \in E,\\[2pt]
+    0, & \text{otherwise,}
+  \end{cases}
+  \label{eq:weights}
+\end{equation}
+so that $\sum_{j} W_{ij} = 1$ at every unit of positive degree. Normalising the
+rows turns the interference term into an average rather than a sum, which keeps
+its scale free of the degree and stops high degree units from dominating the
+objective.
+
+Under SUTVA the potential outcome of unit $i$ would be written $Y_i(P_i)$.
+Spatial spillover makes that inadequate, and we adopt instead the partial
+interference assumption, under which the outcome depends on the assignment of
+$i$ and on the neighbours' assignments only through a summary. We use the
+degree-normalised exposure
+\begin{equation}
+  e_i \;=\; \sum_{j \in \mathcal{N}(i)} W_{ij} P_{j,t}
+        \;=\; \frac{1}{d_i} \sum_{j \in \mathcal{N}(i)} P_{j,t},
+  \label{eq:exposure}
+\end{equation}
+so $e_i \in [0,1]$ is the treated fraction of the neighbourhood of $i$. The
+potential outcome becomes $Y_i(P_i, e_i)$, and the estimands separate into a
+direct effect at fixed exposure and an interference effect at fixed own
+treatment.
+
+\subsection{The two channels}
+
+Let $h_i \in \mathbb{R}^{H}$ be a temporal encoding of the history of unit $i$,
+built by a shared encoder followed by a gated recurrent unit \cite{cho2014gru},
+\begin{align}
+  z_{i,k} &= \mathrm{ReLU}\!\left( \mathbf{W}_{\mathrm{enc}} \tilde{X}_{i,k}
+             + b_{\mathrm{enc}} \right), \quad k = t-W_h+1, \dots, t,
+             \label{eq:encoder}\\
+  h_i     &= \mathrm{GRU}\!\left( z_{i,t-W_h+1}, \dots, z_{i,t} \right),
+             \label{eq:gru}
+\end{align}
+where $\tilde{X}$ denotes the standardised features of
+Section~\ref{subsec:scaling}. Note that \eqref{eq:encoder} and \eqref{eq:gru}
+contain no message passing of any kind, so $h_i$ is a function of the history of
+$i$ and of nothing else.
+
+Writing $s_i = [\, h_i \,\Vert\, P_{i,t} \,]$ for the state concatenated with
+the assignment, the prediction is
+\begin{equation}
+  \hat{Y}_{i,t+1}
+  = \underbrace{X_{i,t} + \mathrm{MLP}_{\Phi}(s_i)}_{\Phi(X_{i,t}, P_{i,t})}
+  \;+\; \underbrace{\sum_{j \in \mathcal{N}(i)} W_{ij} \,
+    \mathrm{MLP}_{\Psi}(s_j)}_{\text{interference}} .
+  \label{eq:decomposition}
+\end{equation}
+The leading $X_{i,t}$ inside $\Phi$ is a residual anchor: the network is asked
+for the change from the last observation rather than for the level. This is not
+cosmetic. Without it the recurrent unit has to rebuild an absolute level through
+a saturating $\tanh$ bottleneck, and the near-linear part of the signal, which
+is simply that the next value resembles the last one, is destroyed on the way.
+Ablating the anchor and holding everything else fixed moves pooled MAE from
+$8.92$ to $37.28$, a factor of $4.2$. Since $X_{i,t}$ is a function of the state
+of $i$, the anchor belongs to the direct term and does not contaminate the other
+one.
+
+\subsection{Recovering the two effects}
+
+Effects are recovered by contrasting each channel against its own untreated
+counterfactual. Put $s_i^{0} = [\, h_i \,\Vert\, 0 \,]$ and set
+\begin{align}
+  \tau_i &= \mathrm{MLP}_{\Phi}(s_i) - \mathrm{MLP}_{\Phi}(s_i^{0}),
+  \label{eq:ite}\\
+  \eta_i &= \sum_{j \in \mathcal{N}(i)} W_{ij}
+            \left( \mathrm{MLP}_{\Psi}(s_j) - \mathrm{MLP}_{\Psi}(s_j^{0}) \right),
+  \label{eq:ste}
+\end{align}
+where $\tau_i$ is the estimated individual treatment effect and $\eta_i$ the
+estimated spatial interference effect. If $P_{i,t}=0$ then $s_i = s_i^{0}$ and
+$\tau_i = 0$ exactly. If $E = \varnothing$ then the sum in \eqref{eq:ste} is
+empty and $\eta_i = 0$ exactly. The additive identity
+$\hat{Y}_{i,t+1} = \Phi_i + \sum_j W_{ij}\Psi_j$ holds to floating point
+tolerance by construction. Algorithm~\ref{alg:cgcen} states the forward pass
+together with the contrasts.
+
+\begin{algorithm}[t]
+\caption{\CGCEN{} forward pass with direct and spillover decomposition}
+\label{alg:cgcen}
+\begin{algorithmic}[1]
+\REQUIRE History $X_{i,t-W_h+1:t}$ for all $i \in V$; assignment
+         $P_{i,t} \in \{0,1\}$; neighbourhoods $\mathcal{N}(\cdot)$ with
+         row-normalised weights $W_{ij}$
+\ENSURE  Prediction $\hat{Y}_{i,t+1}$, effects $\tau_i$ and $\eta_i$
+\STATE $\mu, \sigma \gets$ \textsc{FitScaler}$(X_{\text{train}})$
+       \COMMENT{training split only}
+\STATE $\tilde{X}_{i,\cdot} \gets (X_{i,\cdot} - \mu) / \sigma$ for all $i$
+\FOR{$k = t-W_h+1$ \TO $t$}
+    \STATE $z_{i,k} \gets \mathrm{ReLU}(\mathbf{W}_{\mathrm{enc}} \tilde{X}_{i,k}
+           + b_{\mathrm{enc}})$
+\ENDFOR
+\STATE $h_i \gets \mathrm{GRU}(z_{i,t-W_h+1}, \dots, z_{i,t})$
+       \COMMENT{no message passing}
+\STATE $s_i \gets [\, h_i \,\Vert\, P_{i,t} \,]$, \quad
+       $s_i^{0} \gets [\, h_i \,\Vert\, 0 \,]$
+\STATE $\Phi_i \gets X_{i,t} + \mathrm{MLP}_{\Phi}(s_i)$
+       \COMMENT{residual anchor}
+\STATE $\Omega_i \gets \sum_{j \in \mathcal{N}(i)} W_{ij}\,\mathrm{MLP}_{\Psi}(s_j)$
+\STATE $\hat{Y}_{i,t+1} \gets \Phi_i + \Omega_i$
+\STATE $\tau_i \gets \mathrm{MLP}_{\Phi}(s_i) - \mathrm{MLP}_{\Phi}(s_i^{0})$
+\STATE $\eta_i \gets \sum_{j \in \mathcal{N}(i)} W_{ij}
+        \big(\mathrm{MLP}_{\Psi}(s_j) - \mathrm{MLP}_{\Psi}(s_j^{0})\big)$
+\RETURN $\hat{Y}_{i,t+1}, \tau_i, \eta_i$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Scaling}
+\label{subsec:scaling}
+
+The panel spans several orders of magnitude. Median income is of order $10^{4}$
+and accessibility is of order $10^{0}$, so an unscaled squared error objective
+is governed by the large columns and the gradient carried by the rest is lost.
+We standardise each feature, $\tilde{X}_{\cdot,\cdot,f} =
+(X_{\cdot,\cdot,f} - \mu_f)/\sigma_f$, with $\mu_f$ and $\sigma_f$ estimated on
+the training split only and reused unchanged on the test split, so that no
+distributional information crosses the temporal boundary backwards. Constant
+features are given $\sigma_f = 1$. Metrics are computed after inverting the
+transform, which keeps the errors in the original units and comparable across
+configurations.
+
+\subsection{Baselines}
+
+We compare against three baselines chosen to span the relevant hypothesis space.
+The \emph{temporal MLP} flattens the history window and maps it through a
+two-layer perceptron. It cannot see the graph, and it isolates what the topology
+is worth. The \emph{spatial lag model} is a learned form of the classical
+spatial autoregressive specification \cite{anselin1988,lesage2009},
+\begin{equation}
+  \hat{Y}_{i,t+1} = X_{i,t} + \beta^{\top} \mathrm{vec}(X_{i,t-W_h+1:t})
+  + \rho \odot \sum_{j \in \mathcal{N}(i)} W_{ij} X_{j,t},
+  \label{eq:slm}
+\end{equation}
+with a learned spatial coefficient $\rho$ and a residual anchor matching
+\eqref{eq:decomposition}, so that the comparison turns on functional form and
+not on parameterisation. The \emph{persistence} model returns
+$\hat{Y}_{i,t+1} = X_{i,t}$, has no parameters and is never trained. It is the
+floor which any learned model must clear before a claim about spillover is worth
+making, and including it is what told us, at an earlier stage of this work, that
+both learned baselines were below it.
+
+\subsection{Two indices}
+
+\textbf{Housing and transportation.} Housing cost on its own understates what
+households in poorly connected neighbourhoods pay, because a low rent is often
+bought with a long commute. We define
+\begin{equation}
+  \HT_{i,t}
+  = \frac{\mathrm{Rent}_{i,t} + \mathrm{TransitCost}_{i,t}}
+         {\mathrm{MedianIncome}_{i,t}} ,
+  \label{eq:ht}
+\end{equation}
+with transit cost falling in accessibility,
+\begin{equation}
+  \mathrm{TransitCost}_{i,t} =
+  \frac{c_0}{\max(\mathrm{Accessibility}_{i,t}, \epsilon)^{\kappa}} ,
+  \label{eq:transit}
+\end{equation}
+for a base cost $c_0$ and an elasticity $\kappa$. This is the mechanism a
+rent-to-income ratio misses. A transit investment which raises accessibility
+lowers $\HT$ even where it raises rent, and whether the net movement is
+progressive is then a question the index can be asked.
+
+\textbf{Displacement pressure.} The index blends adverse movements in rent, in
+low income share and in accessibility,
+\begin{align}
+  \DPI_{i,t} =\;& \alpha \left( \frac{\Delta \mathrm{Rent}_{i,t}}
+                                    {\mathrm{Rent}_{i,t-1}} \right)
+  + \beta \left( 1 - \frac{\mathrm{LowIncomeShare}_{i,t}}
+                          {\mathrm{LowIncomeShare}_{i,t-1}} \right) \nonumber\\
+  &+ \gamma \left( \Delta \mathrm{Accessibility}_{i,t} \right)
+   + \delta \, B_{i,t} .
+  \label{eq:dpi}
+\end{align}
+The first three terms are the usual growth-rate form. The fourth is a
+correction, and the reason for it is worth stating plainly. A growth-rate index
+cannot see a sustained level difference. A policy which raises rents permanently
+by six per cent moves the growth rate in the single period in which the shift
+happens, after which the index returns to the path it was already on. In our
+runs this left every policy contrast at around $10^{-4}$, present in the
+arithmetic and absent in any useful sense. We therefore add a cumulative burden
+term measured against the initial burden of the same unit,
+\begin{equation}
+  B_{i,t} = \frac{\HT_{i,t}}{\max(\HT_{i,0}, \epsilon)} - 1 ,
+  \label{eq:burden}
+\end{equation}
+which is zero at $t = 0$ and keeps a permanent offset under a permanent shift.
+Setting $\delta = 0$ recovers the growth-rate form exactly, and we pin that with
+a test so the original specification stays checkable.
+
+Both indices are constructed comparative indicators over a controlled panel.
+Neither is a calibrated forecast of realised displacement, and we use them only
+to rank scenarios against a common baseline.
+
+\section{The synthetic city}
+\label{sec:generator}
+
+\subsection{Graph and dynamics}
+
+The city is a $4 \times 4$ lattice of $N = 16$ units with four-connected
+adjacency, which gives $24$ undirected edges, $48$ directed entries and degrees
+between two and four. Each unit carries land value, rent, population, median
+income, housing units and accessibility, initialised with multiplicative
+Gaussian heterogeneity around city-wide bases of $100$, $50$, $2000$, $60{,}000$,
+$900$ and $1.0$ respectively. Generation is seeded and reproducible.
+
+The dynamics are deliberately transparent. Accessibility shocks raise land
+values, land value growth feeds rent growth after a lag, rent pressure damps
+population, income and housing growth, and neighbour terms diffuse land and rent
+across the edges. A designated set $S = \{0,1,4,7\}$ receives a permanent
+accessibility uplift from $t \ge 3$, standing in for a transit investment.
+
+\subsection{A negative result: the static intercept}
+\label{subsec:collapse}
+
+Our first generator used only that permanent shock, and under it no model
+benefited from the graph. We give the evidence before the explanation.
+
+\begin{itemize}
+\item[--] The spatial lag coefficient of \eqref{eq:slm} converged to
+$\rho \approx 0$ across seeds, taking values $-0.05$, $-0.07$ and $0.02$.
+\item[--] \CGCEN{} with the edges deleted was \emph{better} than \CGCEN{} on the
+real graph, $14.16$ against $14.82$ MAE.
+\item[--] Permuting the edges was indistinguishable from the true topology,
+with $p$ between $0.70$ and $0.93$.
+\end{itemize}
+
+The mechanism is instructive, and once seen it is obvious. A shock applied once
+at $t = 3$ to a fixed set of units means that by the evaluation window, which
+begins at $t = 12$, the neighbour contribution at each unit has settled to a
+constant. That constant is folded into the level of the unit and is recovered
+perfectly by the residual anchor $X_{i,t}$ of \eqref{eq:decomposition}. Put
+differently, spillover which is both permanent and early is observationally the
+same thing as a unit fixed effect. There is nothing left for a graph to carry,
+because the information has already arrived by another road. We call this the
+static intercept, and we suspect it is a common and under-reported failure of
+spatio-temporal benchmarks which inject spillover as a single regime change.
+
+\subsection{Dynamic shocks}
+
+The repair is to keep the spillover moving. At each step every unit
+independently receives an accessibility pulse with probability
+$p_{\mathrm{pulse}} = 0.22$, of magnitude drawn uniformly from
+$[0.5\sigma_p, 1.5\sigma_p]$ with $\sigma_p = 1.2$,
+\begin{equation}
+  u_{i,t} \sim \mathrm{Bernoulli}(p_{\mathrm{pulse}}) \cdot
+                \mathcal{U}(0.5\sigma_p,\, 1.5\sigma_p).
+  \label{eq:pulse}
+\end{equation}
+The pulse enters the observed accessibility of the unit at $t$, and, which is
+the point of the construction, it reaches the rent growth of the
+\emph{neighbours} at $t+1$,
+\begin{equation}
+  g^{\mathrm{rent}}_{i,t} \;\mathrel{+}=\; \lambda_p \sum_{j \in \mathcal{N}(i)}
+  W_{ij} \, u_{j,t-1},
+  \label{eq:pulse-transmission}
+\end{equation}
+with $\lambda_p = 0.22$. Because the pulse is transient and random, a pulse at a
+neighbour of $i$ cannot be inferred from the history of $i$. It is new
+information which travels along an edge and nowhere else. Accessibility is
+observed, so the pulse at $j$ is visible at time $t$ to a model which can read
+across the edge, and it predicts the rent of $i$ at $t+1$. This is what makes
+the graph necessary rather than merely available.
+
+\subsection{Carrying capacities}
+
+The first generator applied purely multiplicative growth with nothing to
+equilibrate it, and this produced a second defect, worse than the first. Rents
+compounded without bound. As the rent-to-income ratio grew, the rent pressure
+term in the income update drove income sharply down, and income met its hard
+floor. In the unrepaired generator income reached the floor at $t = 52$, and by
+$t = 100$ every one of the sixteen units was pinned there while mean rent had
+compounded to about $4 \times 10^{10}$. Any statistic taken past $t \approx 52$
+was measuring the clamp and not the economy.
+
+We add a logistic carrying capacity. Each growth rate is multiplied by a
+headroom factor which vanishes as the state approaches its capacity,
+\begin{equation}
+  \mathrm{headroom}(x, K) = \max\!\left(0,\; 1 - \frac{x}{K}\right),
+  \label{eq:headroom}
+\end{equation}
+with land capacity $12$ times the base land value, income capacity $4$ times the
+base income, and a rent capacity tied to contemporaneous ability to pay,
+$K_R = 0.012 \times \mathrm{Income}_{i,t-1}$. Rent and income also carry mean
+reversion, towards $0.55 K_R$ and towards the base income, at rates $0.05$ and
+$0.02$.
+
+The economic reading is a supply response: as rents approach the local
+affordability ceiling, further growth is choked off by construction, by vacancy
+and by out-migration. The numerical effect is that the economy settles instead
+of diverging. Under the revised generator no unit reaches any hard floor through
+$t = 100$ on any of the ten seeds. Mean rent settles at about
+$1.62 \times 10^{3}$, income at about $1.50 \times 10^{5}$ and $\HT$ at about
+$0.011$. Figure~\ref{fig:trajectories} shows the trajectories.
+
+\subsection{Scenarios}
+
+We define four scenarios, applied to the boundary $S$ as an intervention on the
+generated panel. All four are simple and additive, so that the direction each
+one should move the indices is not in doubt.
+
+\begin{itemize}
+\item[--] \textbf{Baseline.} No intervention. Supplies the untreated
+counterfactual against which the others are differenced.
+\item[--] \textbf{Market-led development.} Upzoning with no affordability
+condition attached: land values up $4\%$ and rents up $6\%$ per unit intensity
+from $t \ge 2$. Should raise displacement pressure.
+\item[--] \textbf{Inclusionary housing.} New development tied to affordable set
+asides: rents down $6\%$ and stock up $8\%$ per unit intensity from $t \ge 1$.
+Should lower pressure.
+\item[--] \textbf{Land-value capture.} Taxation of uplift recycled into
+affordability: land values up a damped $2\%$ and rents down $5\%$ per unit
+intensity from $t \ge 2$. Should lower pressure, with a different land and rent
+signature from the inclusionary case.
+\end{itemize}
+
+Intensities of $0.8$, $0.6$ and $0.7$ are configuration parameters and are not
+fitted. For each of ten seeds we export all four panels with the adjacency, the
+edge index, the low income share and the treated boundary, giving forty
+datasets.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{scenario_trajectories.pdf}
+  \caption{Scenario trajectories over $t = 0 \dots 100$, city-mean, seed 1.
+  Panels (a) and (c) give the levels of the $\HT$ and $\DPI$ indices. Panels (b)
+  and (d) give each intervention as a difference from the untreated baseline,
+  which is the comparative quantity of interest; the inclusionary and
+  land-value-capture curves lie close together and the latter is drawn over the
+  former. Under the carrying capacities of \eqref{eq:headroom} no unit reaches
+  a hard state floor over the horizon, and the policy effects persist as level
+  offsets instead of the single-step transients produced by a growth-rate
+  index.}
+  \label{fig:trajectories}
+\end{figure*}
+
+\section{Experiments}
+\label{sec:experiments}
+
+\subsection{Protocol}
+
+Each run generates a seeded city of $N = 16$ units over $T = 18$ steps, applies
+one of the four scenarios, and forms rolling history windows of length
+$W_h = 4$ with next-step targets. This gives fourteen windows. The split is
+temporal, the earliest $70\%$ for training and the rest for testing, with no
+shuffling, so nine windows train and five are held out and no future information
+reaches the training set. The scaler of Section~\ref{subsec:scaling} is fitted
+on the training windows alone.
+
+We model the three channels which carry the spillover, namely land value, rent
+and accessibility. Every model is constructed under an identical seed
+immediately before instantiation, so that a comparison between architectures, or
+between topology conditions, reflects what is being varied and not the draw of
+the initial weights. Learned models train for $250$ epochs with Adam at learning
+rate $10^{-3}$ under a squared error objective. Persistence has no parameters
+and is not trained. Metrics are computed after inverting the scaler.
+
+The design is ten seeds by four scenarios by four models for the main sweep,
+together with ten seeds by four scenarios by two ablated topologies for
+\CGCEN{}. This is $240$ model instances of which $200$ are trained, the
+remaining forty being persistence.
+
+\subsection{Accuracy}
+
+Table~\ref{tab:benchmark} gives MAE and RMSE by scenario and
+Figure~\ref{fig:comparison} summarises the pooled comparison. Pooled over the
+four scenarios on the real graph, \CGCEN{} reaches $\mathrm{MAE} = 8.88 \pm
+2.40$, against $11.87 \pm 3.12$ for the spatial lag model, $20.03 \pm 7.97$ for
+the temporal MLP and $27.90 \pm 1.27$ for persistence. The RMSE ordering is the
+same, at $13.81$, $19.30$, $34.54$ and $37.54$, so the advantage is not an
+artefact of a few well-predicted units and survives a loss which weights large
+residuals more heavily.
+
+The margin over the graph-blind MLP is large and significant in every scenario,
+with mean differences between $-10.25$ and $-12.45$ MAE and $p$ between
+$9.4 \times 10^{-4}$ and $5.8 \times 10^{-3}$. The margin over persistence is
+larger again, with $p < 2 \times 10^{-8}$ throughout. We treat the persistence
+comparison as a sanity floor and not as a result.
+
+\begin{table*}[t]
+\centering
+\caption{Forecast accuracy by policy scenario on the real graph. Values are mean
+$\pm$ standard deviation of the pooled test-set error over ten seeds. Markers
+give a paired $t$-test of each baseline against \CGCEN{} on MAE
+($^{*}p<0.05$, $^{**}p<0.01$, $^{***}p<0.001$).}
+\label{tab:benchmark}
+\small
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Model} & \multicolumn{2}{c}{\textbf{Baseline}}
+               & \multicolumn{2}{c}{\textbf{Market-Led}}
+               & \multicolumn{2}{c}{\textbf{Inclusionary}}
+               & \multicolumn{2}{c}{\textbf{Land-Value Capture}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+ & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
+\midrule
+\CGCEN{} (ours)
+  & $9.90 \pm 2.23$  & $15.48 \pm 2.99$
+  & $8.67 \pm 2.95$  & $13.76 \pm 4.72$
+  & $8.65 \pm 2.37$  & $13.32 \pm 3.63$
+  & $8.30 \pm 1.99$  & $12.69 \pm 2.98$ \\
+Spatial Lag Model
+  & $11.84 \pm 3.23$ & $19.27 \pm 5.08$
+  & $12.01 \pm 3.28^{**}$ & $19.60 \pm 5.17$
+  & $11.80 \pm 3.23^{**}$ & $19.14 \pm 5.08$
+  & $11.83 \pm 3.24^{**}$ & $19.18 \pm 5.10$ \\
+Temporal MLP
+  & $20.15 \pm 8.57^{**}$ & $35.00 \pm 15.90$
+  & $21.12 \pm 8.56^{**}$ & $36.78 \pm 15.94$
+  & $19.45 \pm 7.93^{**}$ & $33.24 \pm 14.95$
+  & $19.40 \pm 7.94^{***}$ & $33.14 \pm 14.99$ \\
+Naive Persistence
+  & $27.87 \pm 1.30^{***}$ & $37.49 \pm 1.92$
+  & $28.27 \pm 1.32^{***}$ & $38.20 \pm 1.98$
+  & $27.70 \pm 1.29^{***}$ & $37.17 \pm 1.88$
+  & $27.77 \pm 1.29^{***}$ & $37.31 \pm 1.88$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Where the graph pays}
+
+The comparison against the spatial lag model is the substantive one, since that
+model is itself graph-aware and differs from \CGCEN{} chiefly in functional
+form. Here the result is conditional, and we give the condition rather than the
+pooled average.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Scenario} & $\Delta$\textbf{MAE} & $t$ & $p$ & $d_z$ \\
+\midrule
+Baseline              & $-1.94$ & $-1.68$ & $0.127$  & $-0.53$ \\
+Market-led            & $-3.34$ & $-4.14$ & $0.0025$ & $-1.31$ \\
+Inclusionary housing  & $-3.15$ & $-3.96$ & $0.0033$ & $-1.25$ \\
+Land-value capture    & $-3.53$ & $-4.50$ & $0.0015$ & $-1.42$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\CGCEN{} is ahead by roughly $3.3$ MAE under each intervention, with paired
+effect sizes between $-1.25$ and $-1.42$, and its advantage of $1.94$ MAE in the
+untreated equilibrium does not reach significance at ten seeds.
+
+We think this boundary is the most useful thing in the paper. In a static
+equilibrium the spatial structure of the system is summarised well enough by a
+linear autoregressive lag, and the extra capacity of a nonlinear message-passing
+model buys nothing which survives the variance between seeds. Only when the
+interventions inject treatment-dependent perturbations which propagate does the
+interference channel have anything to work on. A paper which reported only the
+pooled comparison would have claimed a general forecasting advantage which the
+per-scenario decomposition does not support.
+
+\subsection{Topology ablation}
+
+To establish that the advantage comes from the graph and not from capacity, we
+refit \CGCEN{} under two counterfactual topologies with everything else held
+fixed. Under \emph{no edges} the interference term of \eqref{eq:decomposition}
+is identically zero. Under \emph{shuffled} the edge index is remapped through a
+random permutation of the units, which preserves the degree sequence and the
+edge count and destroys the correspondence between the graph and space.
+
+\begin{center}
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Topology} & \textbf{MAE} & \textbf{Loss} & \textbf{$p$ vs.\ real} \\
+\midrule
+Real graph      & $8.88$  & ---     & --- \\
+No edges        & $11.77$ & $+2.89$ & $0.005$ to $0.008$ (3 of 4) \\
+Shuffled edges  & $13.76$ & $+4.88$ & $0.0001$ to $0.018$ (4 of 4) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Deleting the graph costs $2.89$ MAE, a relative loss of $32.6\%$. Permuting it
+costs $4.88$, a loss of $55.0\%$, significant in all four scenarios. The
+per-scenario breakdown is in Figure~\ref{fig:ablation}, and the one scenario in
+which edge deletion falls short of significance is the untreated baseline, at
+$p = 0.080$, which is consistent with the previous subsection.
+
+The observation which matters is that shuffled is worse than no edges. Were the
+model using message passing as a generic smoother, a random graph would serve
+about as well as the true one and both would sit between the real graph and the
+edgeless case. Instead a structurally plausible but factually wrong topology
+does more damage than supplying none. That is the signature of a model which has
+learned the particular adjacency: it propagates neighbour information with
+confidence, and when the information comes from the wrong neighbours the
+confidence is what hurts.
+
+For contrast, the same ablation under the static-shock generator of
+Section~\ref{subsec:collapse} put no edges at $14.16$ against $14.82$ for the
+real graph, the edgeless model being ahead, with shuffled indistinguishable from
+real. The ablation is therefore not a confirmation of the final model. It is the
+diagnostic which separated a working benchmark from a degenerate one, and we
+would encourage treating the shuffled condition as routine rather than optional.
+
+\subsection{The two channels}
+
+Figure~\ref{fig:spillover} shows the estimated effects on the lattice. The
+treatment effect concentrates on the treated boundary, as it must, since
+$\tau_i$ is identically zero at untreated units by \eqref{eq:ite}. The
+interference effect spreads outward from the treated set and decays in graph
+distance, and it is exactly zero at units with no treated neighbour. Both are
+structural guarantees rather than learned behaviour, and we check them as unit
+tests along with the additive identity.
+
+\subsection{Scorecard}
+
+Table~\ref{tab:scorecard} ranks the scenarios by displacement pressure
+mitigation. With the burden term of \eqref{eq:dpi} active the contrasts are
+legible. Market-led development raises $\DPI$ by $0.0172 \pm 0.0007$ relative to
+baseline, while inclusionary housing and land-value capture lower it by
+$0.0131 \pm 0.0006$ and $0.0125 \pm 0.0005$. The two mitigating policies are
+close, and are ordered consistently across seeds with inclusionary housing
+slightly ahead, which is unsurprising since it acts on rent and on stock while
+land-value capture acts on rent alone.
+
+Under the growth-rate form the same contrasts were of order $10^{-4}$ and
+returned to zero within one step of the intervention. We stress that this is a
+change in what the index measures and not in the simulated economy. The panels
+are identical and only the reading differs.
+
+\begin{table}[t]
+\centering
+\caption{Policy scorecard ranked by displacement pressure mitigation. Negative
+values indicate that the intervention reduces the index relative to the
+untreated baseline. Means over ten seeds.}
+\label{tab:scorecard}
+\small
+\begin{tabular}{clcc}
+\toprule
+\textbf{Rank} & \textbf{Scenario} & $\Delta\DPI$ & $\Delta\HT$ \\
+\midrule
+1 & Inclusionary housing  & $-0.01305 \pm 0.00055$ & $-4.7 \times 10^{-5}$ \\
+2 & Land-value capture    & $-0.01255 \pm 0.00054$ & $-4.5 \times 10^{-5}$ \\
+3 & Baseline              & $0$                    & $0$ \\
+4 & Market-led            & $+0.01721 \pm 0.00073$ & $+6.1 \times 10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{spillover_heatmaps.pdf}
+  \caption{Direct impact against multi-hop neighbour spillover on the
+  $4 \times 4$ lattice, market-led scenario. Top row: the treated boundary and
+  the magnitude of the treatment effect from $\Phi$. Bottom row: the magnitude
+  of the interference effect from the aggregated $\Psi$, at three evaluation
+  steps. The treatment effect is exactly zero at untreated units and the
+  interference effect is exactly zero at units with no treated neighbour, both
+  by construction of \eqref{eq:ite} and \eqref{eq:ste}.}
+  \label{fig:spillover}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{model_comparison_bar.pdf}
+  \caption{Model families pooled over ten seeds and four scenarios, on the left
+  and in the centre, and displacement pressure mitigation relative to the
+  untreated baseline, on the right. Error bars give one standard deviation
+  across seeds.}
+  \label{fig:comparison}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{ablation_topology.pdf}
+  \caption{Topology ablation. Left: pooled \CGCEN{} accuracy under the real
+  graph, an edgeless graph, and a graph rewired by a random permutation of the
+  units, which leaves the degree sequence unchanged. Right: the same broken down
+  by scenario. Permuting the topology costs more than removing it, which
+  indicates that the model has learned the particular adjacency rather than
+  using message passing as a smoother.}
+  \label{fig:ablation}
+\end{figure*}
+
+\section{Discussion and open questions}
+\label{sec:discussion}
+
+\subsection{What we take from this}
+
+Three points carry past the particular model.
+
+Graph structure is not informative merely because it is present, even when the
+generating process contains explicit spillover. The static intercept of
+Section~\ref{subsec:collapse} shows that spillover which is permanent and early
+is absorbed into the level of the receiving unit and becomes a fixed effect. A
+benchmark built that way will report that graph models do not help, and the
+report will be true of the benchmark and silent about the method. Anyone
+evaluating a spatio-temporal architecture should check that the spillover
+process is still moving inside the evaluation window.
+
+The value of nonlinear message passing depends on the regime. In the untreated
+equilibrium a linear spatial lag cannot be distinguished from \CGCEN{} at ten
+seeds. Under intervention the gap opens to about $3.3$ MAE with large effect
+sizes. Read practically, an agency running a steady-state monitoring model has
+little reason to prefer a graph network to classical spatial econometrics
+\cite{anselin1988,lesage2009}, whereas one comparing prospective interventions
+with propagating consequences does.
+
+Index design can settle a conclusion quietly. The growth-rate displacement index
+is internally coherent and, applied to a permanent shift, reports approximately
+nothing. An analyst who did not interrogate the functional form could reasonably
+conclude that inclusionary housing has no displacement consequence, when the
+index is simply unable to register a sustained level difference. The correction
+in \eqref{eq:burden} changes the measured contrast by two orders of magnitude
+without altering a single simulated quantity.
+
+\subsection{Limitations}
+
+\textbf{No full-scale empirical evaluation.} This is the principal limitation
+and we state it without hedging: every quantitative result above comes from
+synthetic data. We implement a complete empirical pipeline, which ingests a
+census tract table carrying ACS and PLUTO fields, namely median gross rent
+B25064, median household income B19013, population B01003, housing units B25001,
+assessed land value, lot and residential area and a derived transit
+accessibility score, builds tract adjacency from centroid geodesics by
+$k$-nearest neighbours under a haversine metric, and emits a graph. We validate
+it end to end. But we validate it on a schema-compatible sample and not on a
+real extract. The loader reports its provenance through an explicit flag so that
+the distinction cannot be lost downstream, and no number derived from that
+sample appears anywhere in this paper.
+
+The results therefore establish internal validity. Given a process with known
+dynamic spillover, the architecture recovers it, and we can say when it fails
+to. They establish nothing about external validity. Real tract panels are
+irregular, sparsely observed, subject to boundary revision between censuses, and
+carry confounding the generator does not simulate. Whether the conditional
+advantage documented here survives contact with such data is untested, and we
+would regard a policy application of \CGCEN{} before that test as premature.
+
+\textbf{Scale.} Sixteen units over eighteen steps yields nine training windows.
+That is small, and it interacts with the results in a particular way: capacity
+is cheap to waste, which is part of why the temporal MLP is so variable, at
+$\pm 7.97$ MAE, and why the linear model is competitive at all. Real
+metropolitan graphs are larger, irregular, and have heavy-tailed degree
+distributions which a regular lattice does not exercise. We do not claim the
+ordering transfers unchanged.
+
+\textbf{Interventions.} Policies are applied as multiplicative adjustments on
+fixed sets with fixed timing. Real interventions are heterogeneous in intensity,
+phased, politically endogenous to the neighbourhoods which receive them, and
+often anticipated by markets before enactment. Endogeneity in particular would
+break the exogeneity our design assumes, and addressing it needs identification
+machinery, whether instruments, differences in differences with spatial lags, or
+an explicit assignment model, which we have not built.
+
+\textbf{The exposure mapping.} We assume interference travels only through the
+one-hop summary of \eqref{eq:exposure}. This excludes longer-range effects not
+mediated by intervening units, and it compresses a neighbourhood assignment
+vector into a scalar. Both are standard simplifications
+\cite{hudgens2008,forastiere2021} and both are falsifiable.
+
+\subsection{Open questions}
+
+The immediate priority is empirical replication. Obtaining a genuine tract
+extract and rerunning the benchmark against it is the single most valuable next
+step, and the loader exists so that this is a change of configuration rather
+than a piece of engineering. A useful intermediate would be semi-synthetic: real
+tract geometry, adjacency and initial conditions, with simulated interventions
+layered on, which keeps the ground truth while introducing realistic structure.
+
+Beyond that, three questions follow naturally. Richer exposure mappings would
+relax the one-hop scalar towards multi-hop or distance-weighted summaries, and
+it is not obvious how much this buys on a real adjacency. Uncertainty
+quantification over the estimated effects would let the scorecard report
+intervals on policy contrasts rather than point estimates; conformal and
+ensemble approaches are the obvious candidates. Modelling the assignment itself
+would carry the framework from the ex-ante setting, in which assignment is
+stipulated, towards observational evaluation, in which it has to be estimated.
+
+\subsection{Conclusion}
+
+We have presented CivicTwin, a framework which splits urban policy effects into
+a direct term and an interfering term under partial interference, with the split
+enforced by the architecture rather than by regularisation. On a controlled
+benchmark over ten seeds and four scenarios it outperforms a spatial lag model,
+a graph-blind temporal MLP and persistence, and the topology ablations show that
+the graph is carrying the advantage, since permuting the adjacency is worse than
+removing it.
+
+The advantage is conditional and we have tried to be exact about the condition.
+\CGCEN{} separates from classical spatial econometrics under intervention, at
+$p$ between $0.0015$ and $0.0033$, and not in the untreated equilibrium, at
+$p = 0.127$. Under an earlier generator, in which the spillover arrived once and
+stayed, it separated from nothing at all, and neither did anything else, because
+spillover of that kind collapses into a static intercept. We report the negative
+result beside the positive one because for anyone building spatio-temporal
+policy models the boundary between the two regimes is more actionable than
+either result taken alone.
+
+\begin{thebibliography}{99}
+
+\bibitem{rubin1980}
+D.~B. Rubin, ``Randomization analysis of experimental data: The Fisher
+randomization test comment,'' \emph{J. Amer. Statist. Assoc.}, vol.~75,
+no.~371, pp.~591--593, 1980.
+
+\bibitem{hudgens2008}
+M.~G. Hudgens and M.~E. Halloran, ``Toward causal inference with
+interference,'' \emph{J. Amer. Statist. Assoc.}, vol.~103, no.~482,
+pp.~832--842, 2008.
+
+\bibitem{ogburn2014}
+E.~L. Ogburn and T.~J. VanderWeele, ``Causal diagrams for interference,''
+\emph{Statist. Sci.}, vol.~29, no.~4, pp.~559--578, 2014.
+
+\bibitem{forastiere2021}
+L.~Forastiere, E.~M. Airoldi, and F.~Mealli, ``Identification and estimation of
+treatment and interference effects in observational studies on networks,''
+\emph{J. Amer. Statist. Assoc.}, vol.~116, no.~534, pp.~901--918, 2021.
+
+\bibitem{anselin1988}
+L.~Anselin, \emph{Spatial Econometrics: Methods and Models}. Dordrecht, The
+Netherlands: Kluwer Academic Publishers, 1988.
+
+\bibitem{lesage2009}
+J.~P. LeSage and R.~K. Pace, \emph{Introduction to Spatial Econometrics}. Boca
+Raton, FL, USA: Chapman and Hall/CRC, 2009.
+
+\bibitem{kipf2017gcn}
+T.~N. Kipf and M.~Welling, ``Semi-supervised classification with graph
+convolutional networks,'' in \emph{Proc. Int. Conf. Learn. Represent. (ICLR)},
+2017.
+
+\bibitem{li2018dcrnn}
+Y.~Li, R.~Yu, C.~Shahabi, and Y.~Liu, ``Diffusion convolutional recurrent neural
+network: Data-driven traffic forecasting,'' in \emph{Proc. Int. Conf. Learn.
+Represent. (ICLR)}, 2018.
+
+\bibitem{yu2018stgcn}
+B.~Yu, H.~Yin, and Z.~Zhu, ``Spatio-temporal graph convolutional networks: A
+deep learning framework for traffic forecasting,'' in \emph{Proc. 27th Int.
+Joint Conf. Artif. Intell. (IJCAI)}, 2018, pp.~3634--3640.
+
+\bibitem{cho2014gru}
+K.~Cho, B.~van Merri\"{e}nboer, C.~Gulcehre, D.~Bahdanau, F.~Bougares,
+H.~Schwenk, and Y.~Bengio, ``Learning phrase representations using RNN
+encoder--decoder for statistical machine translation,'' in \emph{Proc. Conf.
+Empirical Methods Natural Lang. Process. (EMNLP)}, 2014, pp.~1724--1734.
+
+\bibitem{shalit2017cfr}
+U.~Shalit, F.~D. Johansson, and D.~Sontag, ``Estimating individual treatment
+effect: Generalization bounds and algorithms,'' in \emph{Proc. 34th Int. Conf.
+Mach. Learn. (ICML)}, 2017, pp.~3076--3085.
+
+\bibitem{wager2018causalforest}
+S.~Wager and S.~Athey, ``Estimation and inference of heterogeneous treatment
+effects using random forests,'' \emph{J. Amer. Statist. Assoc.}, vol.~113,
+no.~523, pp.~1228--1242, 2018.
+
+\bibitem{ma2021netdeconf}
+Y.~Ma and V.~Tresp, ``Causal inference under networked interference and
+intervention policy enhancement,'' in \emph{Proc. 24th Int. Conf. Artif. Intell.
+Statist. (AISTATS)}, 2021, pp.~3700--3708.
+
+\bibitem{zuk2018gentrification}
+M.~Zuk, A.~H. Bierbaum, K.~Chapple, K.~Gorska, and A.~Loukaitou-Sideris,
+``Gentrification, displacement, and the role of public investment,'' \emph{J.
+Planning Literature}, vol.~33, no.~1, pp.~31--44, 2018.
+
+\bibitem{cnt2023ht}
+Center for Neighborhood Technology, ``The housing and transportation (H+T)
+affordability index,'' 2023. [Online]. Available:
+\url{https://htaindex.cnt.org/}
+
+\end{thebibliography}
 
 \end{document}
