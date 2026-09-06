@@ -59,6 +59,24 @@ TOPOLOGY_LABELS = {
 }
 
 
+SHOW_FIGURE_TITLES = True
+
+
+def set_figure_titles(enabled: bool) -> None:
+    global SHOW_FIGURE_TITLES
+    SHOW_FIGURE_TITLES = bool(enabled)
+
+
+def _suptitle(fig, *args, **kwargs) -> None:
+    if SHOW_FIGURE_TITLES:
+        plt.Figure.suptitle(fig, *args, **kwargs)
+
+
+def _figtext(fig, *args, **kwargs) -> None:
+    if SHOW_FIGURE_TITLES:
+        plt.Figure.text(fig, *args, **kwargs)
+
+
 def apply_style() -> None:
     plt.rcParams.update(
         {
@@ -227,11 +245,11 @@ def figure_spillover_heatmaps(output_dir: Path, reference: Dict[str, Any]) -> Li
     fig.colorbar(im2, cax=cax2, label="|STE|")
 
     distances = hop_distances(adjacency, boundary)
-    fig.suptitle(
+    _suptitle(fig, 
         "Direct policy impact vs. multi-hop neighbour spillover (Market-Led scenario)",
         fontsize=11,
     )
-    fig.tight_layout(rect=(0, 0.06, 1, 0.96))
+    fig.tight_layout(rect=(0, 0.06, 1, 0.96 if SHOW_FIGURE_TITLES else 1.0))
 
     hop_text = []
     mean_spill = spillover.mean(axis=0)
@@ -320,7 +338,7 @@ def figure_scenario_trajectories(
             loc="upper left",
         )
 
-    fig.suptitle(
+    _suptitle(fig, 
         f"Scenario trajectories over $t=0..{horizon - 1}$ (city-mean, seed {seed})", fontsize=11
     )
     caption = (
@@ -339,8 +357,8 @@ def figure_scenario_trajectories(
             "equilibrium: no node reaches a hard state floor over the full horizon, and "
             "policy effects persist as sustained level offsets rather than transients."
         )
-    fig.text(0.5, -0.035, caption, ha="center", fontsize=7.2, style="italic", wrap=True)
-    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    _figtext(fig, 0.5, -0.035, caption, ha="center", fontsize=7.2, style="italic", wrap=True)
+    fig.tight_layout(rect=(0, 0, 1, 0.94 if SHOW_FIGURE_TITLES else 1.0))
     return save_figure(fig, output_dir, "scenario_trajectories")
 
 
@@ -394,8 +412,8 @@ def figure_model_comparison(
         ax.set_title("DPI change vs. baseline")
         ax.set_xlabel("$\\Delta$ DPI")
 
-    fig.suptitle("Model family comparison and policy DPI mitigation", fontsize=11)
-    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    _suptitle(fig, "Model family comparison and policy DPI mitigation", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.92 if SHOW_FIGURE_TITLES else 1.0))
     return save_figure(fig, output_dir, "model_comparison_bar")
 
 
@@ -446,8 +464,8 @@ def figure_ablation_topology(output_dir: Path, ablation: pd.DataFrame) -> List[P
     axes[1].set_title("Degradation per scenario")
     axes[1].legend(frameon=False, fontsize=7.5)
 
-    fig.suptitle("Graph topology ablation: real vs. removed vs. randomised edges", fontsize=11)
-    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    _suptitle(fig, "Graph topology ablation: real vs. removed vs. randomised edges", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.92 if SHOW_FIGURE_TITLES else 1.0))
     return save_figure(fig, output_dir, "ablation_topology")
 
 
@@ -495,11 +513,17 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--horizon", type=int, default=101)
     parser.add_argument("--epochs", type=int, default=250)
+    parser.add_argument(
+        "--no-titles",
+        action="store_true",
+        help="Omit in-figure titles and captions; the LaTeX caption carries them.",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> None:
     args = _parse_args(argv)
+    set_figure_titles(not args.no_titles)
     generate_all_figures(
         results_dir=args.results_dir,
         output_dir=args.output_dir,

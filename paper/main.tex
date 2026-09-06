@@ -13,6 +13,7 @@
 \usepackage{amsfonts}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{multirow}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{url}
@@ -30,49 +31,42 @@ Framework for Ex-Ante Urban Policy Comparison}
 \author{Abhay~Mahantesh~Zalaki,
         Ayush~Raj,
         and~Prabin~S~M%
-\thanks{Manuscript prepared 31 August 2026. The generator, the benchmark
-harness and the scripts which produce every figure and table below are
-available at \url{https://github.com/AbhayZ1/CivicTwin}.}}
+\thanks{The authors are with the Department of \textsc{[department]},
+\textsc{[institution]}, \textsc{[city, postcode, country]}
+(e-mail: abhaymzalaki@gmail.com; \textsc{[author 2 e-mail]};
+\textsc{[author 3 e-mail]}).}%
+\thanks{Manuscript submitted 6 September 2026. Corresponding author:
+A.~M.~Zalaki.}%
+\thanks{The synthetic generator, the benchmark harness and the scripts which
+produce every figure and table in this paper are available at
+\url{https://github.com/AbhayZ1/CivicTwin}.}}
 
-\markboth{Preprint}{Zalaki \MakeLowercase{\textit{et al.}}: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}
+\markboth{IEEE Transactions on Knowledge and Data Engineering,~Vol.~XX, No.~X, September~2026}%
+{Zalaki \MakeLowercase{\textit{et al.}}: Counterfactual Graph Learning for Ex-Ante Urban Policy Comparison}
 
 \maketitle
 
 \begin{abstract}
-Ex-ante policy comparison asks which of several candidate interventions a city
-should prefer, before any of them is enacted. We treat this as a problem of
-causal inference under spatial interference rather than as one of forecasting.
-An intervention applied to one neighbourhood alters rents in the neighbourhoods
-adjacent to it, so the Stable Unit Treatment Value Assumption fails, and an
-estimator which ignores the failure attributes the neighbour response to the
-control condition.
-
-We propose the Causal Graph Counterfactual Exposure Network (\CGCEN{}), in which
-the one-step-ahead prediction for a neighbourhood splits into a direct term
-$\Phi$, evaluated at the unit itself, and an interference term obtained by
-aggregating a second function $\Psi$ over the neighbours with row-normalised
-weights. The two channels are kept apart by the architecture and not by a
-penalty: $\Phi$ reads a temporal encoding which no message-passing operator has
-touched, so neighbour state cannot reach it. Contrasting each channel against
-its untreated counterfactual returns an individual treatment effect which is
-zero at every untreated unit and an interference effect which is zero on an
-edgeless graph. Alongside the model we define a housing-plus-transportation
-overburden index and a displacement pressure index carrying a cumulative
-burden term.
-
-On a synthetic city with a known generating process, over ten seeds and four
-policy scenarios, \CGCEN{} attains pooled MAE $8.88 \pm 2.40$, against
-$11.87 \pm 3.12$ for a spatial lag model, $20.03 \pm 7.97$ for a temporal MLP
-which cannot see the graph, and $27.90 \pm 1.27$ for persistence. The margin
-over the spatial lag model is significant under each of the three interventions
-($p = 0.0015$ to $0.0033$) and is not significant in the untreated equilibrium
-($p = 0.127$), which we report rather than pool away. Deleting the edges costs
-$2.89$ MAE and permuting them costs $4.88$, so a wrong graph does more damage
-than no graph. We also report a negative result which shaped the design. Under
-a generator whose spillover arrives once and stays, no model we tried gained
-anything from the graph, because spillover of that kind is absorbed into the
-level of each unit and becomes a fixed effect. Graph learning repays its cost
-here only when the spillover process keeps moving.
+Ex-ante policy comparison asks which of several interventions a city should
+prefer, before any is enacted. We treat this as causal inference under spatial
+interference rather than as forecasting: an intervention in one neighbourhood
+moves rents next door, so the Stable Unit Treatment Value Assumption fails and
+an estimator which ignores this charges the neighbour response to the control
+condition. We propose the Causal Graph Counterfactual Exposure Network
+(\CGCEN{}), which splits the one-step-ahead prediction into a direct term
+evaluated at the unit and an interference term aggregated over its neighbours.
+The split is enforced by the architecture rather than by a penalty, since the
+direct term reads a temporal encoding no message-passing operator has touched.
+Contrasting each channel against its untreated counterfactual gives a treatment
+effect which vanishes at untreated units and an interference effect which
+vanishes on an edgeless graph. Over ten seeds and four scenarios on a synthetic
+city, \CGCEN{} reaches pooled MAE $8.88$, against $11.87$ for a spatial lag
+model and $20.03$ for a graph-blind temporal MLP. Its margin over the spatial
+lag model is significant under intervention ($p = 0.0015$ to $0.0033$) and not
+in the untreated equilibrium ($p = 0.127$). Deleting the edges costs $2.89$ MAE
+and permuting them $4.88$, so a wrong graph does more damage than none. We also
+identify a regime, in which spillover arrives once and stays, where no model
+gains from the graph at all.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -422,12 +416,14 @@ low income share and in accessibility,
 \begin{align}
   \DPI_{i,t} =\;& \alpha \left( \frac{\Delta \mathrm{Rent}_{i,t}}
                                     {\mathrm{Rent}_{i,t-1}} \right)
-  + \beta \left( 1 - \frac{\mathrm{LowIncomeShare}_{i,t}}
-                          {\mathrm{LowIncomeShare}_{i,t-1}} \right) \nonumber\\
-  &+ \gamma \left( \Delta \mathrm{Accessibility}_{i,t} \right)
-   + \delta \, B_{i,t} .
+  \;+\; \beta \left( 1 - \frac{\mathrm{LowIncShare}_{i,t}}
+                          {\mathrm{LowIncShare}_{i,t-1}} \right) \nonumber\\
+  &+\; \gamma \left( \Delta \mathrm{Access}_{i,t} \right)
+   \;+\; \delta \, B_{i,t} ,
   \label{eq:dpi}
 \end{align}
+in which $\mathrm{LowIncShare}$ abbreviates the low income share and
+$\mathrm{Access}$ the accessibility of the unit.
 The first three terms are the usual growth-rate form. The fourth is a
 correction, and the reason for it is worth stating plainly. A growth-rate index
 cannot see a sustained level difference. A policy which raises rents permanently
@@ -633,55 +629,69 @@ $9.4 \times 10^{-4}$ and $5.8 \times 10^{-3}$. The margin over persistence is
 larger again, with $p < 2 \times 10^{-8}$ throughout. We treat the persistence
 comparison as a sanity floor and not as a result.
 
-\begin{table*}[t]
-\centering
-\caption{Forecast accuracy by policy scenario on the real graph. Values are mean
-$\pm$ standard deviation of the pooled test-set error over ten seeds. Markers
-give a paired $t$-test of each baseline against \CGCEN{} on MAE
-($^{*}p<0.05$, $^{**}p<0.01$, $^{***}p<0.001$).}
+\begin{table*}[!t]
+\renewcommand{\arraystretch}{1.15}
+\caption{Forecast Accuracy by Policy Scenario on the Real Graph}
 \label{tab:benchmark}
+\centering
 \small
-\begin{tabular}{lcccccccc}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llcccc}
 \toprule
-\textbf{Model} & \multicolumn{2}{c}{\textbf{Baseline}}
-               & \multicolumn{2}{c}{\textbf{Market-Led}}
-               & \multicolumn{2}{c}{\textbf{Inclusionary}}
-               & \multicolumn{2}{c}{\textbf{Land-Value Capture}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
- & MAE & RMSE & MAE & RMSE & MAE & RMSE & MAE & RMSE \\
+\textbf{Scenario} & & \textbf{\CGCEN{} (ours)} & \textbf{Spatial Lag}
+                  & \textbf{Temporal MLP} & \textbf{Persistence} \\
 \midrule
-\CGCEN{} (ours)
-  & $9.90 \pm 2.23$  & $15.48 \pm 2.99$
-  & $8.67 \pm 2.95$  & $13.76 \pm 4.72$
-  & $8.65 \pm 2.37$  & $13.32 \pm 3.63$
-  & $8.30 \pm 1.99$  & $12.69 \pm 2.98$ \\
-Spatial Lag Model
-  & $11.84 \pm 3.23$ & $19.27 \pm 5.08$
-  & $12.01 \pm 3.28^{**}$ & $19.60 \pm 5.17$
-  & $11.80 \pm 3.23^{**}$ & $19.14 \pm 5.08$
-  & $11.83 \pm 3.24^{**}$ & $19.18 \pm 5.10$ \\
-Temporal MLP
-  & $20.15 \pm 8.57^{**}$ & $35.00 \pm 15.90$
-  & $21.12 \pm 8.56^{**}$ & $36.78 \pm 15.94$
-  & $19.45 \pm 7.93^{**}$ & $33.24 \pm 14.95$
-  & $19.40 \pm 7.94^{***}$ & $33.14 \pm 14.99$ \\
-Naive Persistence
-  & $27.87 \pm 1.30^{***}$ & $37.49 \pm 1.92$
-  & $28.27 \pm 1.32^{***}$ & $38.20 \pm 1.98$
-  & $27.70 \pm 1.29^{***}$ & $37.17 \pm 1.88$
-  & $27.77 \pm 1.29^{***}$ & $37.31 \pm 1.88$ \\
+\multirow{2}{*}{Baseline}
+  & MAE  & $\mathbf{9.90 \pm 2.23}$ & $11.84 \pm 3.23$
+         & $20.15 \pm 8.57^{**}$    & $27.87 \pm 1.30^{***}$ \\
+  & RMSE & $\mathbf{15.48 \pm 2.99}$ & $19.27 \pm 5.08$
+         & $35.00 \pm 15.90$         & $37.49 \pm 1.92$ \\
+\addlinespace[2pt]
+\multirow{2}{*}{Market-led development}
+  & MAE  & $\mathbf{8.67 \pm 2.95}$ & $12.01 \pm 3.28^{**}$
+         & $21.12 \pm 8.56^{**}$    & $28.27 \pm 1.32^{***}$ \\
+  & RMSE & $\mathbf{13.76 \pm 4.72}$ & $19.60 \pm 5.17$
+         & $36.78 \pm 15.94$         & $38.20 \pm 1.98$ \\
+\addlinespace[2pt]
+\multirow{2}{*}{Inclusionary housing}
+  & MAE  & $\mathbf{8.65 \pm 2.37}$ & $11.80 \pm 3.23^{**}$
+         & $19.45 \pm 7.93^{**}$    & $27.70 \pm 1.29^{***}$ \\
+  & RMSE & $\mathbf{13.32 \pm 3.63}$ & $19.14 \pm 5.08$
+         & $33.24 \pm 14.95$         & $37.17 \pm 1.88$ \\
+\addlinespace[2pt]
+\multirow{2}{*}{Land-value capture}
+  & MAE  & $\mathbf{8.30 \pm 1.99}$ & $11.83 \pm 3.24^{**}$
+         & $19.40 \pm 7.94^{***}$   & $27.77 \pm 1.29^{***}$ \\
+  & RMSE & $\mathbf{12.69 \pm 2.98}$ & $19.18 \pm 5.10$
+         & $33.14 \pm 14.99$         & $37.31 \pm 1.88$ \\
+\midrule
+\multicolumn{2}{l}{Pooled over scenarios (MAE)}
+  & $\mathbf{8.88 \pm 2.40}$ & $11.87 \pm 3.12$
+  & $20.03 \pm 7.97$ & $27.90 \pm 1.27$ \\
 \bottomrule
 \end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{\textwidth}
+\footnotesize Values are mean $\pm$ standard deviation of the pooled test-set
+error over ten seeds; best per row in bold. Markers give a two-sided paired
+$t$-test of each baseline against \CGCEN{} on MAE
+($^{*}p<0.05$, $^{**}p<0.01$, $^{***}p<0.001$), pairing on the seed.
+\end{minipage}
 \end{table*}
 
 \subsection{Where the graph pays}
 
 The comparison against the spatial lag model is the substantive one, since that
 model is itself graph-aware and differs from \CGCEN{} chiefly in functional
-form. Here the result is conditional, and we give the condition rather than the
-pooled average.
+form. Here the result is conditional, and Table~\ref{tab:vs-slm} gives the
+condition rather than the pooled average.
 
-\begin{center}
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.2}
+\caption{\CGCEN{} Against the Spatial Lag Model, by Scenario}
+\label{tab:vs-slm}
+\centering
 \begin{tabular}{lrrrr}
 \toprule
 \textbf{Scenario} & $\Delta$\textbf{MAE} & $t$ & $p$ & $d_z$ \\
@@ -692,7 +702,13 @@ Inclusionary housing  & $-3.15$ & $-3.96$ & $0.0033$ & $-1.25$ \\
 Land-value capture    & $-3.53$ & $-4.50$ & $0.0015$ & $-1.42$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+
+\vspace{2pt}
+\begin{minipage}{\columnwidth}
+\footnotesize A negative $\Delta$MAE favours \CGCEN{}. Ten seeds, paired on the
+seed; $d_z$ is the paired effect size.
+\end{minipage}
+\end{table}
 
 \CGCEN{} is ahead by roughly $3.3$ MAE under each intervention, with paired
 effect sizes between $-1.25$ and $-1.42$, and its advantage of $1.94$ MAE in the
@@ -711,22 +727,34 @@ per-scenario decomposition does not support.
 
 To establish that the advantage comes from the graph and not from capacity, we
 refit \CGCEN{} under two counterfactual topologies with everything else held
-fixed. Under \emph{no edges} the interference term of \eqref{eq:decomposition}
-is identically zero. Under \emph{shuffled} the edge index is remapped through a
+fixed, and Table~\ref{tab:ablation} reports the outcome. Under \emph{no edges}
+the interference term of \eqref{eq:decomposition} is identically zero. Under \emph{shuffled} the edge index is remapped through a
 random permutation of the units, which preserves the degree sequence and the
 edge count and destroys the correspondence between the graph and space.
 
-\begin{center}
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.2}
+\caption{Topology Ablation for \CGCEN{}}
+\label{tab:ablation}
+\centering
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrl}
 \toprule
 \textbf{Topology} & \textbf{MAE} & \textbf{Loss} & \textbf{$p$ vs.\ real} \\
 \midrule
 Real graph      & $8.88$  & ---     & --- \\
-No edges        & $11.77$ & $+2.89$ & $0.005$ to $0.008$ (3 of 4) \\
-Shuffled edges  & $13.76$ & $+4.88$ & $0.0001$ to $0.018$ (4 of 4) \\
+No edges        & $11.77$ & $+2.89$ & $0.005$--$0.008$ (3 of 4) \\
+Shuffled edges  & $13.76$ & $+4.88$ & $0.0001$--$0.018$ (4 of 4) \\
 \bottomrule
 \end{tabular}
-\end{center}
+
+\vspace{2pt}
+\begin{minipage}{\columnwidth}
+\footnotesize Pooled over ten seeds and four scenarios. The final column gives
+the range of per-scenario $p$-values against the real graph and, in brackets,
+the number of scenarios reaching $p<0.05$.
+\end{minipage}
+\end{table}
 
 Deleting the graph costs $2.89$ MAE, a relative loss of $32.6\%$. Permuting it
 costs $4.88$, a loss of $55.0\%$, significant in all four scenarios. The
@@ -776,23 +804,29 @@ returned to zero within one step of the intervention. We stress that this is a
 change in what the index measures and not in the simulated economy. The panels
 are identical and only the reading differs.
 
-\begin{table}[t]
-\centering
-\caption{Policy scorecard ranked by displacement pressure mitigation. Negative
-values indicate that the intervention reduces the index relative to the
-untreated baseline. Means over ten seeds.}
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.2}
+\caption{Policy Scorecard, Ranked by Displacement Pressure Mitigation}
 \label{tab:scorecard}
-\small
-\begin{tabular}{clcc}
+\centering
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{clrr}
 \toprule
 \textbf{Rank} & \textbf{Scenario} & $\Delta\DPI$ & $\Delta\HT$ \\
 \midrule
-1 & Inclusionary housing  & $-0.01305 \pm 0.00055$ & $-4.7 \times 10^{-5}$ \\
-2 & Land-value capture    & $-0.01255 \pm 0.00054$ & $-4.5 \times 10^{-5}$ \\
-3 & Baseline              & $0$                    & $0$ \\
-4 & Market-led            & $+0.01721 \pm 0.00073$ & $+6.1 \times 10^{-5}$ \\
+1 & Inclusionary housing & $-0.0131$ & $-4.7\!\times\!10^{-5}$ \\
+2 & Land-value capture   & $-0.0125$ & $-4.5\!\times\!10^{-5}$ \\
+3 & Baseline             & $0$       & $0$ \\
+4 & Market-led           & $+0.0172$ & $+6.1\!\times\!10^{-5}$ \\
 \bottomrule
 \end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{\columnwidth}
+\footnotesize Negative values indicate that the intervention reduces the index
+relative to the untreated baseline. Means over ten seeds; the standard
+deviation of $\Delta\DPI$ is below $8\times10^{-4}$ in every case.
+\end{minipage}
 \end{table}
 
 \begin{figure*}[t]
@@ -944,6 +978,16 @@ spillover of that kind collapses into a static intercept. We report the negative
 result beside the positive one because for anyone building spatio-temporal
 policy models the boundary between the two regimes is more actionable than
 either result taken alone.
+
+\section*{Data and Code Availability}
+
+The synthetic generator, the four-model baseline suite, the ten-seed benchmark
+harness, the topology ablations and the scripts which produce every figure and
+table in this paper are available at
+\url{https://github.com/AbhayZ1/CivicTwin}. The repository also carries a
+configuration profile which reproduces the degenerate static-shock regime of
+Section~\ref{subsec:collapse}, so that the negative result reported there
+remains auditable.
 
 \begin{thebibliography}{99}
 
